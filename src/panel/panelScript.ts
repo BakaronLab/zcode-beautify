@@ -15,7 +15,12 @@ export function buildPanelScript(apiPort: number): string {
   return `(function(){
   var API = ${JSON.stringify(api)};
   var ROOT_ID = ${JSON.stringify(PANEL_ROOT_ID)};
-  if (document.getElementById(ROOT_ID)) return;
+  // Always rebuild: an older panel left in the DOM would otherwise shadow the
+  // current script version forever (the old build skipped installation).
+  var stale = document.getElementById(ROOT_ID);
+  if (stale) stale.remove();
+  var staleStyle = document.getElementById('zcode-beautify-panel-style');
+  if (staleStyle) staleStyle.remove();
 
   var css = [
     '#zcode-beautify-panel-root, #zcode-beautify-panel-root * { box-sizing: border-box; font-family: system-ui, sans-serif; }',
