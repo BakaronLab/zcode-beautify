@@ -78,7 +78,7 @@ export function buildPanelScript(apiPort: number): string {
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <button class="zb-btn" id="zb-reset" title="移除壁纸与配色,还原 ZCode 默认外观">还原默认外观</button>' +
+    '      <button class="zb-btn" id="zb-reset" title="移除壁纸与配色,还原 ZCode 默认外观(壁纸会被记住,可再次恢复)">还原默认外观</button>' +
     '    </div>' +
     '  </div>' +
     '</div>' +
@@ -130,6 +130,20 @@ export function buildPanelScript(apiPort: number): string {
         $('zb-monet').checked = !!c.monet;
         $('zb-vis').checked = !!c.wallpaperVisible;
         $('zb-fit') && applyFitLabel($('zb-fit'), c.fit || 'cover');
+        var resetBtn = $('zb-reset');
+        if (c.wallpaperSet) {
+          resetBtn.textContent = '还原默认外观';
+          resetBtn.setAttribute('data-mode', 'reset');
+          resetBtn.title = '移除壁纸与配色,还原 ZCode 默认外观(壁纸会被记住,可再次恢复)';
+        } else if (c.hasBackup) {
+          resetBtn.textContent = '恢复我的壁纸';
+          resetBtn.setAttribute('data-mode', 'restore');
+          resetBtn.title = '从备份恢复你之前的壁纸与配色';
+        } else {
+          resetBtn.textContent = '还原默认外观';
+          resetBtn.setAttribute('data-mode', 'reset');
+          resetBtn.title = '当前已是默认外观';
+        }
       })
       .catch(function () { status('无法连接美化服务 service unreachable'); });
   }
@@ -169,9 +183,15 @@ export function buildPanelScript(apiPort: number): string {
   });
 
   $('zb-reset').addEventListener('click', function () {
-    post('/api/reset', {}, function () {
-      try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
-      status('已还原默认外观');
+    var mode = this.getAttribute('data-mode') || 'reset';
+    post(mode === 'restore' ? '/api/restore' : '/api/reset', {}, function () {
+      if (mode === 'reset') {
+        try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
+        status('已还原默认外观');
+      } else {
+        status('已恢复你的壁纸');
+      }
+      refresh();
     });
   });
 

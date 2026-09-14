@@ -110123,7 +110123,7 @@ function buildPanelScript(apiPort) {
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <button class="zb-btn" id="zb-reset" title="\u79FB\u9664\u58C1\u7EB8\u4E0E\u914D\u8272,\u8FD8\u539F ZCode \u9ED8\u8BA4\u5916\u89C2">\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2</button>' +
+    '      <button class="zb-btn" id="zb-reset" title="\u79FB\u9664\u58C1\u7EB8\u4E0E\u914D\u8272,\u8FD8\u539F ZCode \u9ED8\u8BA4\u5916\u89C2(\u58C1\u7EB8\u4F1A\u88AB\u8BB0\u4F4F,\u53EF\u518D\u6B21\u6062\u590D)">\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2</button>' +
     '    </div>' +
     '  </div>' +
     '</div>' +
@@ -110175,6 +110175,20 @@ function buildPanelScript(apiPort) {
         $('zb-monet').checked = !!c.monet;
         $('zb-vis').checked = !!c.wallpaperVisible;
         $('zb-fit') && applyFitLabel($('zb-fit'), c.fit || 'cover');
+        var resetBtn = $('zb-reset');
+        if (c.wallpaperSet) {
+          resetBtn.textContent = '\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2';
+          resetBtn.setAttribute('data-mode', 'reset');
+          resetBtn.title = '\u79FB\u9664\u58C1\u7EB8\u4E0E\u914D\u8272,\u8FD8\u539F ZCode \u9ED8\u8BA4\u5916\u89C2(\u58C1\u7EB8\u4F1A\u88AB\u8BB0\u4F4F,\u53EF\u518D\u6B21\u6062\u590D)';
+        } else if (c.hasBackup) {
+          resetBtn.textContent = '\u6062\u590D\u6211\u7684\u58C1\u7EB8';
+          resetBtn.setAttribute('data-mode', 'restore');
+          resetBtn.title = '\u4ECE\u5907\u4EFD\u6062\u590D\u4F60\u4E4B\u524D\u7684\u58C1\u7EB8\u4E0E\u914D\u8272';
+        } else {
+          resetBtn.textContent = '\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2';
+          resetBtn.setAttribute('data-mode', 'reset');
+          resetBtn.title = '\u5F53\u524D\u5DF2\u662F\u9ED8\u8BA4\u5916\u89C2';
+        }
       })
       .catch(function () { status('\u65E0\u6CD5\u8FDE\u63A5\u7F8E\u5316\u670D\u52A1 service unreachable'); });
   }
@@ -110214,9 +110228,15 @@ function buildPanelScript(apiPort) {
   });
 
   $('zb-reset').addEventListener('click', function () {
-    post('/api/reset', {}, function () {
-      try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
-      status('\u5DF2\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2');
+    var mode = this.getAttribute('data-mode') || 'reset';
+    post(mode === 'restore' ? '/api/restore' : '/api/reset', {}, function () {
+      if (mode === 'reset') {
+        try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
+        status('\u5DF2\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2');
+      } else {
+        status('\u5DF2\u6062\u590D\u4F60\u7684\u58C1\u7EB8');
+      }
+      refresh();
     });
   });
 
@@ -110301,6 +110321,12 @@ async function getAssets(wallpaperPath) {
 function currentConfig() {
   return { ...DEFAULT_CONFIG, ...loadConfig() };
 }
+function backupFile() {
+  return path3.join(dataDir(), "config.backup.json");
+}
+function hasBackup() {
+  return fs5.existsSync(backupFile());
+}
 function publicConfig(config) {
   return {
     blur: config.blur,
@@ -110309,6 +110335,7 @@ function publicConfig(config) {
     wallpaperVisible: config.wallpaperVisible,
     fit: config.fit,
     wallpaperSet: Boolean(config.wallpaperPath && fs5.existsSync(config.wallpaperPath)),
+    hasBackup: hasBackup(),
     cdpPort: config.port
   };
 }
@@ -110468,6 +110495,11 @@ async function startServe(opts) {
         return;
       }
       if (req.method === "POST" && url.pathname === "/api/reset") {
+        const stored = loadConfig();
+        if (stored.wallpaperPath && fs5.existsSync(stored.wallpaperPath)) {
+          fs5.mkdirSync(dataDir(), { recursive: true });
+          fs5.writeFileSync(backupFile(), JSON.stringify(stored));
+        }
         for (const [id, session] of held) {
           try {
             if (session.themeScriptId) {
@@ -110481,10 +110513,22 @@ async function startServe(opts) {
             held.delete(id);
           }
         }
-        const stored = loadConfig();
         saveConfig({ ...stored, wallpaperPath: void 0 });
         cachedAssets = void 0;
-        sendJson(res, 200, { ok: true });
+        sendJson(res, 200, { ok: true, hasBackup: true });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/restore") {
+        let saved;
+        try {
+          saved = JSON.parse(fs5.readFileSync(backupFile(), "utf8"));
+        } catch {
+          throw new Error("no wallpaper backup available");
+        }
+        const config = { ...DEFAULT_CONFIG, ...saved };
+        saveConfig(config);
+        const windows = await pushConfigToSessions(config).catch(() => 0);
+        sendJson(res, 200, { ok: true, windows, ...publicConfig(config) });
         return;
       }
       if (req.method === "GET" && url.pathname === "/api/health") {

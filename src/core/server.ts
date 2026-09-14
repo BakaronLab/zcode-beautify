@@ -57,6 +57,14 @@ function currentConfig(): BeautifyConfig {
   return { ...DEFAULT_CONFIG, ...loadConfig() };
 }
 
+function backupFile(): string {
+  return path.join(dataDir(), "config.backup.json");
+}
+
+function hasBackup(): boolean {
+  return fs.existsSync(backupFile());
+}
+
 function publicConfig(config: BeautifyConfig) {
   return {
     blur: config.blur,
@@ -65,6 +73,7 @@ function publicConfig(config: BeautifyConfig) {
     wallpaperVisible: config.wallpaperVisible,
     fit: config.fit,
     wallpaperSet: Boolean(config.wallpaperPath && fs.existsSync(config.wallpaperPath)),
+    hasBackup: hasBackup(),
     cdpPort: config.port,
   };
 }
@@ -258,6 +267,13 @@ export async function startServe(opts: ServeOptions): Promise<void> {
       }
 
       if (req.method === "POST" && url.pathname === "/api/reset") {
+        const stored = loadConfig();
+        // Back up the wallpaper config so /api/restore can bring it back
+        // without re-importing the image.
+        if (stored.wallpaperPath && fs.existsSync(stored.wallpaperPath)) {
+          fs.mkdirSync(dataDir(), { recursive: true });
+          fs.writeFileSync(backupFile(), JSON.stringify(stored));
+        }
         for (const [id, session] of held) {
           try {
             if (session.themeScriptId) {
@@ -272,10 +288,23 @@ export async function startServe(opts: ServeOptions): Promise<void> {
             held.delete(id);
           }
         }
-        const stored = loadConfig();
         saveConfig({ ...stored, wallpaperPath: undefined });
         cachedAssets = undefined;
-        sendJson(res, 200, { ok: true });
+        sendJson(res, 200, { ok: true, hasBackup: true });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/restore") {
+        let saved: Partial<BeautifyConfig>;
+        try {
+          saved = JSON.parse(fs.readFileSync(backupFile(), "utf8"));
+        } catch {
+          throw new Error("no wallpaper backup available");
+        }
+        const config: BeautifyConfig = { ...DEFAULT_CONFIG, ...saved };
+        saveConfig(config);
+        const windows = await pushConfigToSessions(config).catch(() => 0);
+        sendJson(res, 200, { ok: true, windows, ...publicConfig(config) });
         return;
       }
 
