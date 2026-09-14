@@ -8,7 +8,7 @@ Beautify the **ZCode desktop client**: use any image as a background wallpaper a
 
 ## Features
 
-- **Wallpaper** — any local image becomes a fixed background layer behind the UI.
+- **Wallpaper** — any local image becomes a fixed background layer behind the UI, with three framing modes: `cover` (fill and crop), `contain` (letterboxed over a blurred backdrop of the same picture), and `smart` — a local AI-style analysis that finds the salient subject and picks the best framing and focus point automatically.
 - **Monet theming** — a source color is extracted from the wallpaper with Google's official MD3 algorithm; light/dark palettes are mapped onto ZCode's semantic CSS variables (35+ tokens).
 - **Live settings panel** — a draggable panel inside ZCode with blur/dim sliders, Monet and wallpaper-visibility toggles, one-click wallpaper swap, and reset. Changes preview instantly and persist.
 - **Conversation control** — bundled slash command `/beautify` and MCP tools let the ZCode agent set the wallpaper or tune the theme on your behalf.
@@ -63,7 +63,7 @@ node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
 node dist/cli.js serve
 ```
 
-With `serve` running, a 🎨 button appears in the bottom-right corner of ZCode. Open it to tune blur/dim live, toggle Monet colors or wallpaper translucency, swap the wallpaper image, or reset — everything previews instantly and is saved automatically.
+With `serve` running, a 🎨 button appears in the bottom-right corner of ZCode. Open it to tune blur/dim live, cycle the framing mode (cover → contain → smart), toggle Monet colors or wallpaper translucency, swap the wallpaper image, or reset — everything previews instantly and is saved automatically.
 
 You can also just type `/beautify <image path>` in ZCode and let the agent do it, then say things like "make it blurrier" (handled by the `apply_options` MCP tool).
 
@@ -72,7 +72,7 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 | Command | Purpose |
 |---|---|
 | `launch [--port N]` | Start ZCode with `--remote-debugging-port` (quit ZCode first) |
-| `apply <image> [--blur] [--dim] [--no-monet]` | Set wallpaper + adapt colors |
+| `apply <image> [--blur] [--dim] [--fit] [--no-monet]` | Set wallpaper + adapt colors (`--fit cover\|contain\|smart`) |
 | `colors` | Re-apply the stored theme without changing the image |
 | `serve [--api-port M]` | Watch mode + settings panel + local control API (default API port 9223) |
 | `watch` | Headless watch mode: re-inject whenever ZCode restarts |
@@ -84,7 +84,7 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 | Tool | Purpose |
 |---|---|
 | `set_background` | Set wallpaper + Monet colors |
-| `apply_options` | Tune blur/dim/monet/wallpaper visibility without re-sending the image |
+| `apply_options` | Tune blur/dim/monet/wallpaper visibility/framing without re-sending the image |
 | `refresh_theme` | Re-inject the stored theme after a restart |
 | `reset_appearance` | Remove wallpaper and overrides |
 | `beautify_status` | Show the stored config |

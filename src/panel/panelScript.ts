@@ -65,6 +65,9 @@ export function buildPanelScript(apiPort: number): string {
     '      <label><input type="checkbox" id="zb-monet"> Monet</label>' +
     '      <label><input type="checkbox" id="zb-vis"> Wallpaper</label>' +
     '    </div>' +
+    '    <div class="zb-row">' +
+    '      <button class="zb-btn" id="zb-fit" title="Framing: cover fills and crops, contain letterboxes with a blurred backdrop, smart analyzes the picture locally">Fit: cover</button>' +
+    '    </div>' +
     '    <div class="zb-row zb-actions">' +
     '      <label class="zb-btn" for="zb-file">Change image…</label>' +
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
@@ -119,6 +122,8 @@ export function buildPanelScript(apiPort: number): string {
         $('zb-dim').value = c.dim; $('zb-dim-val').textContent = c.dim;
         $('zb-monet').checked = !!c.monet;
         $('zb-vis').checked = !!c.wallpaperVisible;
+        $('zb-fit').textContent = 'Fit: ' + (c.fit || 'cover');
+        $('zb-fit').setAttribute('data-fit', c.fit || 'cover');
       })
       .catch(function () { status('beautify service unreachable'); });
   }
@@ -131,6 +136,15 @@ export function buildPanelScript(apiPort: number): string {
   });
   $('zb-monet').addEventListener('change', pushConfig);
   $('zb-vis').addEventListener('change', pushConfig);
+
+  var FITS = ['cover', 'contain', 'smart'];
+  $('zb-fit').addEventListener('click', function () {
+    var current = this.getAttribute('data-fit') || 'cover';
+    var next = FITS[(FITS.indexOf(current) + 1) % FITS.length];
+    this.textContent = 'Fit: ' + next;
+    this.setAttribute('data-fit', next);
+    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? 'fit: ' + next : 'saved (ZCode not reachable)'); });
+  });
 
   $('zb-file').addEventListener('change', function () {
     var f = this.files && this.files[0];

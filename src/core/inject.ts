@@ -7,6 +7,8 @@ import { CdpConnection, injectIntoTarget, listTargets, pickRendererTargets, buil
 import { loadWallpaper, type WallpaperAssets } from "./monet.js";
 import { buildVariableOverrides } from "./tokens.js";
 
+export type WallpaperFit = "cover" | "contain" | "smart";
+
 export interface BeautifyConfig {
   port: number;
   wallpaperPath?: string;
@@ -14,6 +16,7 @@ export interface BeautifyConfig {
   dim: number;
   monet: boolean;
   wallpaperVisible: boolean;
+  fit: WallpaperFit;
 }
 
 export const DEFAULT_CONFIG: BeautifyConfig = {
@@ -22,16 +25,30 @@ export const DEFAULT_CONFIG: BeautifyConfig = {
   dim: 25,
   monet: true,
   wallpaperVisible: true,
+  fit: "cover",
 };
 
 export interface BuiltPayload {
   css: string;
   wallpaperDataUri?: string;
   assets?: WallpaperAssets;
+  /** How the wallpaper layer is framed; "contain" adds a blurred backdrop. */
+  fit: "cover" | "contain";
+  /** Normalized focus point for background-position. */
+  focusX: number;
+  focusY: number;
 }
 
 export function buildPayload(config: BeautifyConfig, assets?: WallpaperAssets): BuiltPayload {
   const parts: string[] = [];
+
+  // "smart" resolves to the analyzed suggestion at build time, so the injected
+  // CSS only ever deals with cover or contain.
+  const resolved: "cover" | "contain" =
+    config.fit === "smart" ? (assets?.focus.fit ?? "cover") : config.fit === "contain" ? "contain" : "cover";
+  const focusX = config.fit === "smart" ? (assets?.focus.x ?? 0.5) : 0.5;
+  const focusY = config.fit === "smart" ? (assets?.focus.y ?? 0.5) : 0.5;
+  const position = `${Math.round(focusX * 100)}% ${Math.round(focusY * 100)}%`;
 
   parts.push(`
 html, body { background: transparent !important; }
@@ -39,13 +56,26 @@ html, body { background: transparent !important; }
   position: fixed;
   inset: 0;
   z-index: -2147483646;
-  background-size: cover;
-  background-position: center;
+  background-size: ${resolved};
+  background-position: ${resolved === "contain" ? "center" : position};
   background-repeat: no-repeat;
   pointer-events: none;
   filter: blur(${config.blur}px);
   transform: scale(${config.blur > 0 ? 1.04 : 1});
-}`);
+}
+#zcode-beautify-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -2147483647;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  filter: blur(28px) saturate(1.15) brightness(0.85);
+  transform: scale(1.12);
+  display: none;
+}
+#zcode-beautify-backdrop[data-on="1"] { display: block; }`);
   if (config.dim > 0) {
     parts.push(`#zcode-beautify-wallpaper::after {
   content: '';
@@ -66,6 +96,9 @@ html, body { background: transparent !important; }
     css: parts.join("\n"),
     wallpaperDataUri: assets?.dataUri,
     assets,
+    fit: resolved,
+    focusX,
+    focusY,
   };
 }
 

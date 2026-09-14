@@ -26,8 +26,11 @@ modifies ZCode's installation files.
    port. Instruct the user to quit ZCode completely and start it via
    `node <plugin-root>/dist/cli.js launch`, or via watch mode:
    `node <plugin-root>/dist/cli.js watch` (keeps re-injecting across restarts).
-4. **Fine-tune with `apply_options`** (blur / dim / monet / wallpaper_visible)
-   when the user wants adjustments — it does not need the image path again.
+4. **Fine-tune with `apply_options`** (blur / dim / monet / wallpaper_visible /
+   fit) when the user wants adjustments — it does not need the image path
+   again. `fit` picks the framing: `cover` fills and crops, `contain`
+   letterboxes over a blurred backdrop, `smart` analyzes the picture locally
+   and picks framing + focus automatically.
 5. **After ZCode restarts**, the injected theme is gone until re-injected — use
    the `refresh_theme` tool or run watch mode.
 6. **To undo everything**, use `reset_appearance`.
@@ -40,7 +43,7 @@ modifies ZCode's installation files.
 | Tool | Purpose |
 |---|---|
 | `set_background` | Set wallpaper + Monet colors |
-| `apply_options` | Tune blur/dim/monet/wallpaper visibility without changing the image |
+| `apply_options` | Tune blur/dim/monet/wallpaper visibility/framing without changing the image |
 | `refresh_theme` | Re-inject stored theme after a restart |
 | `reset_appearance` | Remove wallpaper and overrides |
 | `beautify_status` | Show stored config |

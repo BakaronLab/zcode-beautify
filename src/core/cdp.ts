@@ -113,6 +113,8 @@ export interface InjectionPayload {
   wallpaperDataUri?: string;
   /** Unique-ish id so re-injection is idempotent. */
   marker?: string;
+  /** "contain" additionally drives a blurred backdrop layer behind the image. */
+  fit?: "cover" | "contain";
 }
 
 /**
@@ -167,6 +169,20 @@ export function buildBootstrapScript(payload: InjectionPayload): string {
     wp.remove();
   }
 
+  var FIT = ${JSON.stringify(payload.fit ?? "cover")};
+  var bp = document.getElementById(MARKER + '-backdrop');
+  if (FIT === 'contain' && ${JSON.stringify(Boolean(payload.wallpaperDataUri))}) {
+    if (!bp) {
+      bp = document.createElement('div');
+      bp.id = MARKER + '-backdrop';
+      document.documentElement.appendChild(bp);
+    }
+    bp.style.backgroundImage = 'url(' + ${JSON.stringify(payload.wallpaperDataUri ?? "")} + ')';
+    bp.dataset.on = '1';
+  } else if (bp) {
+    bp.dataset.on = '0';
+  }
+
   // Persist for the panel's self-heal path (best effort; large wallpapers may
   // exceed the localStorage quota, in which case only the CSS is saved).
   try {
@@ -181,6 +197,7 @@ export function buildResetScript(marker = "zcode-beautify"): string {
   return `(function(){
   document.getElementById(${JSON.stringify(marker)} + '-style')?.remove();
   document.getElementById(${JSON.stringify(marker)} + '-wallpaper')?.remove();
+  document.getElementById(${JSON.stringify(marker)} + '-backdrop')?.remove();
   if (window.__zcodeBeautify) { window.__zcodeBeautify.cssText = null; }
 })();`;
 }

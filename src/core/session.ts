@@ -13,6 +13,7 @@ export interface ApplyOptions {
   dim?: number;
   monet?: boolean;
   wallpaperVisible?: boolean;
+  fit?: "cover" | "contain" | "smart";
 }
 
 /** Applies (or refreshes) the theme using the stored config. */
@@ -34,6 +35,7 @@ export async function applyWallpaper(imagePath: string, opts: ApplyOptions): Pro
     dim: opts.dim ?? stored.dim ?? DEFAULT_CONFIG.dim,
     monet: opts.monet ?? stored.monet ?? DEFAULT_CONFIG.monet,
     wallpaperVisible: opts.wallpaperVisible ?? stored.wallpaperVisible ?? DEFAULT_CONFIG.wallpaperVisible,
+    fit: opts.fit ?? stored.fit ?? DEFAULT_CONFIG.fit,
   };
 
   // Keep a copy of the wallpaper inside the data dir so the theme survives
@@ -62,6 +64,7 @@ export async function applyColorsOnly(opts: ApplyOptions): Promise<number> {
     dim: opts.dim ?? stored.dim ?? DEFAULT_CONFIG.dim,
     monet: opts.monet ?? stored.monet ?? DEFAULT_CONFIG.monet,
     wallpaperVisible: opts.wallpaperVisible ?? stored.wallpaperVisible ?? DEFAULT_CONFIG.wallpaperVisible,
+    fit: opts.fit ?? stored.fit ?? DEFAULT_CONFIG.fit,
   };
   saveConfig(config);
   return applyToZCode(config, await buildPayloadFromConfig(config));

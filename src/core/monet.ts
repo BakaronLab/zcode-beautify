@@ -20,6 +20,16 @@ export interface WallpaperAssets {
   sourceArgb: number;
   /** Light and dark MD3 themes generated from the source color. */
   theme: Theme;
+  /** Saliency-based framing suggestion for `fit: "smart"`. */
+  focus: ImageFocus;
+}
+
+export interface ImageFocus {
+  /** Salient-region center, normalized 0-1. */
+  x: number;
+  y: number;
+  /** Whether the image suits full cover cropping or letterboxed contain. */
+  fit: "cover" | "contain";
 }
 
 const MAX_WIDTH = 2560;
@@ -37,11 +47,51 @@ export async function loadWallpaper(imagePath: string, maxDimension = MAX_WIDTH)
 
   const sourceArgb = extractSourceColor(image.bitmap);
   const theme = themeFromSourceColor(sourceArgb);
+  const focus = analyzeFocus(image.bitmap);
 
   const jpeg = await image.getBuffer("image/jpeg", { quality: JPEG_QUALITY });
   const dataUri = `data:image/jpeg;base64,${jpeg.toString("base64")}`;
 
-  return { dataUri, sourceArgb, theme };
+  return { dataUri, sourceArgb, theme, focus };
+}
+
+/**
+ * Lightweight "smart fit" analysis, fully local: a saliency-weighted centroid
+ * (pixels far from the global mean color get the most weight) becomes the
+ * focus point, and extreme aspect ratios switch to a letterboxed contain mode
+ * so the picture is never cropped beyond recognition.
+ */
+export function analyzeFocus(bitmap: { width: number; height: number; data: Uint8Array | Buffer }): ImageFocus {
+  const { width, height, data } = bitmap;
+  const aspect = width / height;
+  const fit: ImageFocus["fit"] = aspect > 2.4 || aspect < 0.42 ? "contain" : "cover";
+
+  // First pass: mean color of an opaque sample.
+  const stride = Math.max(1, Math.floor(Math.sqrt((width * height) / 24000)));
+  let rs = 0, gs = 0, bs = 0, n = 0;
+  const samples: Array<[number, number, number, number, number]> = [];
+  for (let y = 0; y < height; y += stride) {
+    for (let x = 0; x < width; x += stride) {
+      const i = (y * width + x) * 4;
+      if (data[i + 3] < 255) continue;
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      samples.push([x, y, r, g, b]);
+      rs += r; gs += g; bs += b; n++;
+    }
+  }
+  if (n === 0) return { x: 0.5, y: 0.5, fit };
+  const mr = rs / n, mg = gs / n, mb = bs / n;
+
+  // Second pass: weight = squared color distance from the mean → centroid of
+  // whatever stands out (subject, highlights, accents).
+  let wx = 0, wy = 0, wsum = 0;
+  for (const [x, y, r, g, b] of samples) {
+    const dr = r - mr, dg = g - mg, db = b - mb;
+    const w = dr * dr + dg * dg + db * db + 1;
+    wx += x * w; wy += y * w; wsum += w;
+  }
+  const clamp = (v: number) => Math.min(1, Math.max(0, v));
+  return { x: clamp(wx / wsum / width), y: clamp(wy / wsum / height), fit };
 }
 
 /** Celebi quantization + MD3 scoring, on a decimated pixel sample. */

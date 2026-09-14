@@ -47,11 +47,12 @@ server.registerTool(
       dim: z.number().min(0).max(100).optional().describe("Wallpaper darkening 0-100"),
       monet: z.boolean().optional().describe("Regenerate UI colors from the wallpaper (true) or keep ZCode's original colors (false)"),
       wallpaper_visible: z.boolean().optional().describe("Translucent surfaces showing the wallpaper (true) or opaque surfaces (false)"),
+      fit: z.enum(["cover", "contain", "smart"]).optional().describe("Framing: cover fills and crops, contain letterboxes with a blurred backdrop, smart analyzes the picture locally and picks the best framing + focus point"),
     },
   },
-  async ({ blur, dim, monet, wallpaper_visible }) => {
+  async ({ blur, dim, monet, wallpaper_visible, fit }) => {
     try {
-      const windows = await applyColorsOnly({ blur, dim, monet, wallpaperVisible: wallpaper_visible });
+      const windows = await applyColorsOnly({ blur, dim, monet, wallpaperVisible: wallpaper_visible, fit });
       return { content: [{ type: "text", text: `Appearance updated in ${windows} window(s).` }] };
     } catch (err) {
       return { content: [{ type: "text", text: `Failed: ${(err as Error).message}` }], isError: true };

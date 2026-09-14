@@ -9,7 +9,8 @@
  *   watch    Keep re-injecting: survives ZCode restarts while this process lives.
  */
 
-import { applyToZCode, buildPayload, resetZCode } from "./core/inject.js";
+import { applyToZCode, buildPayload, resetZCode, type BeautifyConfig } from "./core/inject.js";
+import type { ApplyOptions } from "./core/session.js";
 import { loadWallpaper } from "./core/monet.js";
 import { launchZcode } from "./core/launch.js";
 import { applyWallpaper, resetAppearance } from "./core/session.js";
@@ -21,6 +22,7 @@ Commands:
   apply <image> [options]        Set wallpaper and adapt colors
     --blur <px>                  Blur the wallpaper (default 0)
     --dim <0-100>                Darken the wallpaper (default 25)
+    --fit <mode>                 cover | contain | smart (default cover)
     --no-monet                   Keep ZCode's original colors
     --port <N>                   CDP port (default 9222)
   colors [--port N]              Re-apply stored theme without wallpaper change
@@ -69,6 +71,7 @@ async function main(): Promise<void> {
           blur: Number(flag("--blur") ?? 0),
           dim: Number(flag("--dim") ?? 25),
           monet: !has("--no-monet"),
+          fit: flag("--fit") as ApplyOptions["fit"],
         });
         console.log(`Applied wallpaper + theme to ${windows} window(s).`);
         break;
@@ -118,7 +121,12 @@ async function main(): Promise<void> {
 async function watch(port: number): Promise<void> {
   const { buildPayloadFromConfig } = await import("./core/session.js");
   const { loadConfig } = await import("./core/launch.js");
-  const config = { ...{ port: 9222, blur: 0, dim: 25, monet: true, wallpaperVisible: true }, ...loadConfig(), port };
+  const config = {
+    ...{ port: 9222, blur: 0, dim: 25, monet: true, wallpaperVisible: true, fit: "cover" as const },
+    ...loadConfig(),
+    port,
+    fit: loadConfig().fit ?? "cover",
+  } as BeautifyConfig;
   const payload = await buildPayloadFromConfig(config);
 
   let injected = new Set<string>();

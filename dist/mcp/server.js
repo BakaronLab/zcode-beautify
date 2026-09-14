@@ -66113,6 +66113,20 @@ function buildBootstrapScript(payload) {
     wp.remove();
   }
 
+  var FIT = ${JSON.stringify(payload.fit ?? "cover")};
+  var bp = document.getElementById(MARKER + '-backdrop');
+  if (FIT === 'contain' && ${JSON.stringify(Boolean(payload.wallpaperDataUri))}) {
+    if (!bp) {
+      bp = document.createElement('div');
+      bp.id = MARKER + '-backdrop';
+      document.documentElement.appendChild(bp);
+    }
+    bp.style.backgroundImage = 'url(' + ${JSON.stringify(payload.wallpaperDataUri ?? "")} + ')';
+    bp.dataset.on = '1';
+  } else if (bp) {
+    bp.dataset.on = '0';
+  }
+
   // Persist for the panel's self-heal path (best effort; large wallpapers may
   // exceed the localStorage quota, in which case only the CSS is saved).
   try {
@@ -66125,6 +66139,7 @@ function buildResetScript(marker = "zcode-beautify") {
   return `(function(){
   document.getElementById(${JSON.stringify(marker)} + '-style')?.remove();
   document.getElementById(${JSON.stringify(marker)} + '-wallpaper')?.remove();
+  document.getElementById(${JSON.stringify(marker)} + '-backdrop')?.remove();
   if (window.__zcodeBeautify) { window.__zcodeBeautify.cssText = null; }
 })();`;
 }
@@ -144309,9 +144324,44 @@ async function loadWallpaper(imagePath, maxDimension = MAX_WIDTH) {
   }
   const sourceArgb = extractSourceColor(image2.bitmap);
   const theme = themeFromSourceColor(sourceArgb);
+  const focus = analyzeFocus(image2.bitmap);
   const jpeg2 = await image2.getBuffer("image/jpeg", { quality: JPEG_QUALITY });
   const dataUri = `data:image/jpeg;base64,${jpeg2.toString("base64")}`;
-  return { dataUri, sourceArgb, theme };
+  return { dataUri, sourceArgb, theme, focus };
+}
+function analyzeFocus(bitmap) {
+  const { width, height, data } = bitmap;
+  const aspect = width / height;
+  const fit = aspect > 2.4 || aspect < 0.42 ? "contain" : "cover";
+  const stride = Math.max(1, Math.floor(Math.sqrt(width * height / 24e3)));
+  let rs = 0, gs = 0, bs = 0, n2 = 0;
+  const samples = [];
+  for (let y2 = 0; y2 < height; y2 += stride) {
+    for (let x2 = 0; x2 < width; x2 += stride) {
+      const i2 = (y2 * width + x2) * 4;
+      if (data[i2 + 3] < 255)
+        continue;
+      const r2 = data[i2], g = data[i2 + 1], b = data[i2 + 2];
+      samples.push([x2, y2, r2, g, b]);
+      rs += r2;
+      gs += g;
+      bs += b;
+      n2++;
+    }
+  }
+  if (n2 === 0)
+    return { x: 0.5, y: 0.5, fit };
+  const mr = rs / n2, mg = gs / n2, mb = bs / n2;
+  let wx = 0, wy = 0, wsum = 0;
+  for (const [x2, y2, r2, g, b] of samples) {
+    const dr = r2 - mr, dg = g - mg, db = b - mb;
+    const w = dr * dr + dg * dg + db * db + 1;
+    wx += x2 * w;
+    wy += y2 * w;
+    wsum += w;
+  }
+  const clamp = (v) => Math.min(1, Math.max(0, v));
+  return { x: clamp(wx / wsum / width), y: clamp(wy / wsum / height), fit };
 }
 function extractSourceColor(bitmap) {
   const { width, height, data } = bitmap;
@@ -144409,23 +144459,41 @@ var DEFAULT_CONFIG = {
   blur: 0,
   dim: 25,
   monet: true,
-  wallpaperVisible: true
+  wallpaperVisible: true,
+  fit: "cover"
 };
 function buildPayload(config2, assets) {
   const parts = [];
+  const resolved = config2.fit === "smart" ? assets?.focus.fit ?? "cover" : config2.fit === "contain" ? "contain" : "cover";
+  const focusX = config2.fit === "smart" ? assets?.focus.x ?? 0.5 : 0.5;
+  const focusY = config2.fit === "smart" ? assets?.focus.y ?? 0.5 : 0.5;
+  const position = `${Math.round(focusX * 100)}% ${Math.round(focusY * 100)}%`;
   parts.push(`
 html, body { background: transparent !important; }
 #zcode-beautify-wallpaper {
   position: fixed;
   inset: 0;
   z-index: -2147483646;
-  background-size: cover;
-  background-position: center;
+  background-size: ${resolved};
+  background-position: ${resolved === "contain" ? "center" : position};
   background-repeat: no-repeat;
   pointer-events: none;
   filter: blur(${config2.blur}px);
   transform: scale(${config2.blur > 0 ? 1.04 : 1});
-}`);
+}
+#zcode-beautify-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -2147483647;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  filter: blur(28px) saturate(1.15) brightness(0.85);
+  transform: scale(1.12);
+  display: none;
+}
+#zcode-beautify-backdrop[data-on="1"] { display: block; }`);
   if (config2.dim > 0) {
     parts.push(`#zcode-beautify-wallpaper::after {
   content: '';
@@ -144443,7 +144511,10 @@ html, body { background: transparent !important; }
   return {
     css: parts.join("\n"),
     wallpaperDataUri: assets?.dataUri,
-    assets
+    assets,
+    fit: resolved,
+    focusX,
+    focusY
   };
 }
 async function applyToZCode(config2, payload) {
@@ -144525,7 +144596,8 @@ async function applyWallpaper(imagePath, opts) {
     blur: opts.blur ?? stored.blur ?? DEFAULT_CONFIG.blur,
     dim: opts.dim ?? stored.dim ?? DEFAULT_CONFIG.dim,
     monet: opts.monet ?? stored.monet ?? DEFAULT_CONFIG.monet,
-    wallpaperVisible: opts.wallpaperVisible ?? stored.wallpaperVisible ?? DEFAULT_CONFIG.wallpaperVisible
+    wallpaperVisible: opts.wallpaperVisible ?? stored.wallpaperVisible ?? DEFAULT_CONFIG.wallpaperVisible,
+    fit: opts.fit ?? stored.fit ?? DEFAULT_CONFIG.fit
   };
   fs4.mkdirSync(dataDir(), { recursive: true });
   const dest = path2.join(dataDir(), "wallpaper" + path2.extname(abs).toLowerCase());
@@ -144546,7 +144618,8 @@ async function applyColorsOnly(opts) {
     blur: opts.blur ?? stored.blur ?? DEFAULT_CONFIG.blur,
     dim: opts.dim ?? stored.dim ?? DEFAULT_CONFIG.dim,
     monet: opts.monet ?? stored.monet ?? DEFAULT_CONFIG.monet,
-    wallpaperVisible: opts.wallpaperVisible ?? stored.wallpaperVisible ?? DEFAULT_CONFIG.wallpaperVisible
+    wallpaperVisible: opts.wallpaperVisible ?? stored.wallpaperVisible ?? DEFAULT_CONFIG.wallpaperVisible,
+    fit: opts.fit ?? stored.fit ?? DEFAULT_CONFIG.fit
   };
   saveConfig(config2);
   return applyToZCode(config2, await buildPayloadFromConfig(config2));
@@ -144596,11 +144669,12 @@ server.registerTool("apply_options", {
     blur: external_exports.number().min(0).max(100).optional().describe("Wallpaper blur radius in px"),
     dim: external_exports.number().min(0).max(100).optional().describe("Wallpaper darkening 0-100"),
     monet: external_exports.boolean().optional().describe("Regenerate UI colors from the wallpaper (true) or keep ZCode's original colors (false)"),
-    wallpaper_visible: external_exports.boolean().optional().describe("Translucent surfaces showing the wallpaper (true) or opaque surfaces (false)")
+    wallpaper_visible: external_exports.boolean().optional().describe("Translucent surfaces showing the wallpaper (true) or opaque surfaces (false)"),
+    fit: external_exports.enum(["cover", "contain", "smart"]).optional().describe("Framing: cover fills and crops, contain letterboxes with a blurred backdrop, smart analyzes the picture locally and picks the best framing + focus point")
   }
-}, async ({ blur, dim, monet, wallpaper_visible }) => {
+}, async ({ blur, dim, monet, wallpaper_visible, fit }) => {
   try {
-    const windows = await applyColorsOnly({ blur, dim, monet, wallpaperVisible: wallpaper_visible });
+    const windows = await applyColorsOnly({ blur, dim, monet, wallpaperVisible: wallpaper_visible, fit });
     return { content: [{ type: "text", text: `Appearance updated in ${windows} window(s).` }] };
   } catch (err) {
     return { content: [{ type: "text", text: `Failed: ${err.message}` }], isError: true };

@@ -8,7 +8,7 @@
 
 ## 功能
 
-- **壁纸**——任意本地图片作为固定背景层,铺在 UI 之下。
+- **壁纸**——任意本地图片作为固定背景层,铺在 UI 之下;三种取景模式:`cover`(填满裁剪)、`contain`(完整显示,背后是同图模糊放大底)、`smart`(AI 适应:本地分析画面主体,自动选择最佳取景与焦点位置)。
 - **莫奈配色**——用 Google 官方 MD3 算法从壁纸提取 source color,生成 light/dark 双套调色板,映射覆盖 ZCode 的 35+ 个语义 CSS 变量。
 - **实时设置面板**——ZCode 窗口内可拖拽的悬浮面板:blur/dim 滑块、Monet 开关、壁纸透显开关、一键换图、还原;所有调整即时预览并自动保存。
 - **对话控制**——内置 `/beautify` 斜杠命令与 MCP 工具,让 ZCode 智能体代你设壁纸、调主题。
@@ -63,7 +63,7 @@ node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
 node dist/cli.js serve
 ```
 
-`serve` 运行时,ZCode 右下角出现 🎨 按钮。点开即可实时调 blur/dim、开关 Monet 配色与壁纸透显、更换壁纸图片或一键还原——所有调整即时预览、自动保存。
+`serve` 运行时,ZCode 右下角出现 🎨 按钮。点开即可实时调 blur/dim、循环切换取景模式(cover → contain → smart)、开关 Monet 配色与壁纸透显、更换壁纸图片或一键还原——所有调整即时预览、自动保存。
 
 也可以直接在 ZCode 里输入 `/beautify <图片路径>` 让智能体操作,之后说"模糊调高一点"即可(由 `apply_options` MCP 工具处理)。
 
@@ -72,7 +72,7 @@ node dist/cli.js serve
 | 命令 | 用途 |
 |---|---|
 | `launch [--port N]` | 以调试端口启动 ZCode(需先完全退出) |
-| `apply <image> [--blur] [--dim] [--no-monet]` | 设壁纸并适配配色 |
+| `apply <image> [--blur] [--dim] [--fit] [--no-monet]` | 设壁纸并适配配色(`--fit cover\|contain\|smart`) |
 | `colors` | 不换图,重新应用已存主题 |
 | `serve [--api-port M]` | 守护模式 + 设置面板 + 本地控制 API(默认 API 端口 9223) |
 | `watch` | 无面板守护模式:ZCode 重启后自动重注入 |
@@ -84,7 +84,7 @@ node dist/cli.js serve
 | 工具 | 用途 |
 |---|---|
 | `set_background` | 设壁纸 + 莫奈配色 |
-| `apply_options` | 不重传图片,单独调 blur/dim/monet/壁纸透显 |
+| `apply_options` | 不重传图片,单独调 blur/dim/monet/壁纸透显/取景模式 |
 | `refresh_theme` | 重启后重注入已存主题 |
 | `reset_appearance` | 移除壁纸与覆盖,还原默认 |
 | `beautify_status` | 查看已存配置 |

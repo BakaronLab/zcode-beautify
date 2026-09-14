@@ -63,6 +63,7 @@ function publicConfig(config: BeautifyConfig) {
     dim: config.dim,
     monet: config.monet,
     wallpaperVisible: config.wallpaperVisible,
+    fit: config.fit,
     wallpaperSet: Boolean(config.wallpaperPath && fs.existsSync(config.wallpaperPath)),
     cdpPort: config.port,
   };
@@ -74,6 +75,7 @@ function sanitize(body: any): Partial<BeautifyConfig> {
   if (typeof body?.dim === "number" && body.dim >= 0 && body.dim <= 100) out.dim = body.dim;
   if (typeof body?.monet === "boolean") out.monet = body.monet;
   if (typeof body?.wallpaperVisible === "boolean") out.wallpaperVisible = body.wallpaperVisible;
+  if (body?.fit === "cover" || body?.fit === "contain" || body?.fit === "smart") out.fit = body.fit;
   return out;
 }
 
@@ -104,6 +106,7 @@ async function holdSession(
   const bootstrap = buildBootstrapScript({
     css: payload.css,
     wallpaperDataUri: payload.wallpaperDataUri,
+    fit: payload.fit,
   });
   const { identifier } = await conn.send("Page.addScriptToEvaluateOnNewDocument", {
     source: bootstrap,
@@ -125,6 +128,7 @@ async function pushConfigToSessions(config: BeautifyConfig): Promise<number> {
   const bootstrap = buildBootstrapScript({
     css: payload.css,
     wallpaperDataUri: payload.wallpaperDataUri,
+    fit: payload.fit,
   });
   let ok = 0;
   for (const [id, session] of held) {
