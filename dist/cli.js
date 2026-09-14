@@ -110086,7 +110086,7 @@ function buildPanelScript(apiPort) {
     '.zb-row { margin-bottom: 10px; }',
     '.zb-row label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: .85; }',
     '#zb-panel input[type=range] { width: 100%; accent-color: #7aa2f7; height: 18px; margin: 0; cursor: pointer; }',
-    '.zb-toggles { display: flex; gap: 14px; }',
+    '.zb-toggles { display: flex; justify-content: center; gap: 16px; }',
     '.zb-toggles label { display: flex; align-items: center; gap: 5px; margin: 0; cursor: pointer; }',
     '.zb-actions { display: flex; gap: 8px; }',
     '.zb-btn { flex: 1; text-align: center; padding: 6px 0; border-radius: 7px; cursor: pointer;',
@@ -110107,21 +110107,23 @@ function buildPanelScript(apiPort) {
     '<div id="zb-panel" hidden>' +
     '  <div id="zb-head"><span>ZCode Beautify</span><span id="zb-close">\u2715</span></div>' +
     '  <div id="zb-body">' +
-    '    <div class="zb-row"><label><span>\u6A21\u7CCA Blur</span><span><span id="zb-blur-val">0</span>px</span></label>' +
+    '    <div class="zb-row"><label title="\u80CC\u666F\u6A21\u7CCA\u7A0B\u5EA6(\u50CF\u7D20)"><span>\u80CC\u666F\u6A21\u7CCA</span><span><span id="zb-blur-val">0</span>px</span></label>' +
     '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
-    '    <div class="zb-row"><label><span>\u538B\u6697 Dim</span><span><span id="zb-dim-val">0</span>%</span></label>' +
+    '    <div class="zb-row"><label title="\u80CC\u666F\u538B\u6697\u7A0B\u5EA6(\u767E\u5206\u6BD4,\u8D8A\u9AD8\u8D8A\u6697)"><span>\u80CC\u666F\u538B\u6697</span><span><span id="zb-dim-val">0</span>%</span></label>' +
     '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
-    '    <div class="zb-row zb-toggles">' +
-    '      <label><input type="checkbox" id="zb-monet">\u83AB\u5948 Monet</label>' +
-    '      <label><input type="checkbox" id="zb-vis">\u58C1\u7EB8 Wallpaper</label>' +
-    '    </div>' +
     '    <div class="zb-row">' +
-    '      <button class="zb-btn" id="zb-fit" title="cover \u586B\u6EE1\u88C1\u526A / contain \u5B8C\u6574\u663E\u793A(\u6A21\u7CCA\u5E95)/ smart \u667A\u80FD\u5206\u6790\u4E3B\u4F53\u81EA\u52A8\u53D6\u666F"></button>' +
+    '      <button class="zb-btn" id="zb-fit" title="\u80CC\u666F\u586B\u5145\u65B9\u5F0F:\u586B\u6EE1\u88C1\u526A\u94FA\u6EE1\u7A97\u53E3 / \u5B8C\u6574\u663E\u793A\u4E0D\u88C1\u526A(\u6A21\u7CCA\u57AB\u5E95)/ \u667A\u80FD\u9002\u914D\u81EA\u52A8\u5206\u6790\u753B\u9762\u4E3B\u4F53"></button>' +
+    '    </div>' +
+    '    <div class="zb-row zb-toggles">' +
+    '      <label title="\u6839\u636E\u58C1\u7EB8\u81EA\u52A8\u751F\u6210 UI \u914D\u8272;\u5173\u95ED\u5219\u4FDD\u7559 ZCode \u539F\u751F\u989C\u8272"><input type="checkbox" id="zb-monet">UI \u83AB\u5948\u53D6\u8272</label>' +
+    '      <label title="\u663E\u793A\u6216\u9690\u85CF\u80CC\u666F\u58C1\u7EB8"><input type="checkbox" id="zb-vis">\u663E\u793A\u58C1\u7EB8</label>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <label class="zb-btn" for="zb-file">\u66F4\u6362\u56FE\u7247 Image\u2026</label>' +
+    '      <label class="zb-btn" for="zb-file" title="\u9009\u62E9\u4E00\u5F20\u56FE\u7247\u4F5C\u4E3A\u80CC\u666F\u58C1\u7EB8,UI \u914D\u8272\u968F\u4E4B\u66F4\u65B0">\u66F4\u6362\u56FE\u7247\u2026</label>' +
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
-    '      <button class="zb-btn" id="zb-reset">\u8FD8\u539F Reset</button>' +
+    '    </div>' +
+    '    <div class="zb-row zb-actions">' +
+    '      <button class="zb-btn" id="zb-reset" title="\u79FB\u9664\u58C1\u7EB8\u4E0E\u914D\u8272,\u8FD8\u539F ZCode \u9ED8\u8BA4\u5916\u89C2">\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2</button>' +
     '    </div>' +
     '  </div>' +
     '</div>' +
@@ -110187,23 +110189,23 @@ function buildPanelScript(apiPort) {
   $('zb-vis').addEventListener('change', pushConfig);
 
   var FITS = ['cover', 'contain', 'smart'];
-  var FIT_LABELS = { cover: '\u586B\u6EE1 cover', contain: '\u5B8C\u6574 contain', smart: '\u667A\u80FD smart' };
+  var FIT_LABELS = { cover: '\u586B\u6EE1\u88C1\u526A', contain: '\u5B8C\u6574\u663E\u793A', smart: '\u667A\u80FD\u9002\u914D' };
   function applyFitLabel(btn, fit) {
-    btn.textContent = '\u53D6\u666F Fit: ' + (FIT_LABELS[fit] || fit);
+    btn.textContent = '\u80CC\u666F\u586B\u5145: ' + (FIT_LABELS[fit] || fit);
     btn.setAttribute('data-fit', fit);
   }
   $('zb-fit').addEventListener('click', function () {
     var current = this.getAttribute('data-fit') || 'cover';
     var next = FITS[(FITS.indexOf(current) + 1) % FITS.length];
     applyFitLabel(this, next);
-    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? '\u53D6\u666F\u5DF2\u5E94\u7528 fit: ' + next : '\u5DF2\u4FDD\u5B58(ZCode \u672A\u8FDE\u63A5)'); });
+    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? '\u5DF2\u5E94\u7528:' + FIT_LABELS[next] : '\u5DF2\u4FDD\u5B58(ZCode \u672A\u8FDE\u63A5)'); });
   });
 
   $('zb-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
     this.value = '';
     if (!f) return;
-    if (f.size > 20 * 1024 * 1024) { status('\u56FE\u7247\u8FC7\u5927,\u4E0A\u9650 20 MB max'); return; }
+    if (f.size > 20 * 1024 * 1024) { status('\u56FE\u7247\u8FC7\u5927,\u4E0A\u9650 20 MB'); return; }
     var fr = new FileReader();
     fr.onload = function () {
       post('/api/wallpaper', { dataUri: fr.result, name: f.name }, function () { status('\u58C1\u7EB8\u5DF2\u66F4\u65B0 updated'); });
@@ -110214,7 +110216,7 @@ function buildPanelScript(apiPort) {
   $('zb-reset').addEventListener('click', function () {
     post('/api/reset', {}, function () {
       try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
-      status('\u5DF2\u8FD8\u539F reset');
+      status('\u5DF2\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2');
     });
   });
 
@@ -110224,6 +110226,9 @@ function buildPanelScript(apiPort) {
     if (!p.hidden) refresh();
   });
   $('zb-close').addEventListener('click', function () { $('zb-panel').hidden = true; });
+
+  // Fill in the fit label (and control values) right away, not just on open.
+  refresh();
 
   (function () {
     var head = $('zb-head'), panel = $('zb-panel');

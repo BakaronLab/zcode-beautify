@@ -41,7 +41,7 @@ export function buildPanelScript(apiPort: number): string {
     '.zb-row { margin-bottom: 10px; }',
     '.zb-row label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: .85; }',
     '#zb-panel input[type=range] { width: 100%; accent-color: #7aa2f7; height: 18px; margin: 0; cursor: pointer; }',
-    '.zb-toggles { display: flex; gap: 14px; }',
+    '.zb-toggles { display: flex; justify-content: center; gap: 16px; }',
     '.zb-toggles label { display: flex; align-items: center; gap: 5px; margin: 0; cursor: pointer; }',
     '.zb-actions { display: flex; gap: 8px; }',
     '.zb-btn { flex: 1; text-align: center; padding: 6px 0; border-radius: 7px; cursor: pointer;',
@@ -62,21 +62,23 @@ export function buildPanelScript(apiPort: number): string {
     '<div id="zb-panel" hidden>' +
     '  <div id="zb-head"><span>ZCode Beautify</span><span id="zb-close">✕</span></div>' +
     '  <div id="zb-body">' +
-    '    <div class="zb-row"><label><span>模糊 Blur</span><span><span id="zb-blur-val">0</span>px</span></label>' +
+    '    <div class="zb-row"><label title="背景模糊程度(像素)"><span>背景模糊</span><span><span id="zb-blur-val">0</span>px</span></label>' +
     '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
-    '    <div class="zb-row"><label><span>压暗 Dim</span><span><span id="zb-dim-val">0</span>%</span></label>' +
+    '    <div class="zb-row"><label title="背景压暗程度(百分比,越高越暗)"><span>背景压暗</span><span><span id="zb-dim-val">0</span>%</span></label>' +
     '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
-    '    <div class="zb-row zb-toggles">' +
-    '      <label><input type="checkbox" id="zb-monet">莫奈 Monet</label>' +
-    '      <label><input type="checkbox" id="zb-vis">壁纸 Wallpaper</label>' +
-    '    </div>' +
     '    <div class="zb-row">' +
-    '      <button class="zb-btn" id="zb-fit" title="cover 填满裁剪 / contain 完整显示(模糊底)/ smart 智能分析主体自动取景"></button>' +
+    '      <button class="zb-btn" id="zb-fit" title="背景填充方式:填满裁剪铺满窗口 / 完整显示不裁剪(模糊垫底)/ 智能适配自动分析画面主体"></button>' +
+    '    </div>' +
+    '    <div class="zb-row zb-toggles">' +
+    '      <label title="根据壁纸自动生成 UI 配色;关闭则保留 ZCode 原生颜色"><input type="checkbox" id="zb-monet">UI 莫奈取色</label>' +
+    '      <label title="显示或隐藏背景壁纸"><input type="checkbox" id="zb-vis">显示壁纸</label>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <label class="zb-btn" for="zb-file">更换图片 Image…</label>' +
+    '      <label class="zb-btn" for="zb-file" title="选择一张图片作为背景壁纸,UI 配色随之更新">更换图片…</label>' +
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
-    '      <button class="zb-btn" id="zb-reset">还原 Reset</button>' +
+    '    </div>' +
+    '    <div class="zb-row zb-actions">' +
+    '      <button class="zb-btn" id="zb-reset" title="移除壁纸与配色,还原 ZCode 默认外观">还原默认外观</button>' +
     '    </div>' +
     '  </div>' +
     '</div>' +
@@ -142,23 +144,23 @@ export function buildPanelScript(apiPort: number): string {
   $('zb-vis').addEventListener('change', pushConfig);
 
   var FITS = ['cover', 'contain', 'smart'];
-  var FIT_LABELS = { cover: '填满 cover', contain: '完整 contain', smart: '智能 smart' };
+  var FIT_LABELS = { cover: '填满裁剪', contain: '完整显示', smart: '智能适配' };
   function applyFitLabel(btn, fit) {
-    btn.textContent = '取景 Fit: ' + (FIT_LABELS[fit] || fit);
+    btn.textContent = '背景填充: ' + (FIT_LABELS[fit] || fit);
     btn.setAttribute('data-fit', fit);
   }
   $('zb-fit').addEventListener('click', function () {
     var current = this.getAttribute('data-fit') || 'cover';
     var next = FITS[(FITS.indexOf(current) + 1) % FITS.length];
     applyFitLabel(this, next);
-    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? '取景已应用 fit: ' + next : '已保存(ZCode 未连接)'); });
+    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? '已应用:' + FIT_LABELS[next] : '已保存(ZCode 未连接)'); });
   });
 
   $('zb-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
     this.value = '';
     if (!f) return;
-    if (f.size > 20 * 1024 * 1024) { status('图片过大,上限 20 MB max'); return; }
+    if (f.size > 20 * 1024 * 1024) { status('图片过大,上限 20 MB'); return; }
     var fr = new FileReader();
     fr.onload = function () {
       post('/api/wallpaper', { dataUri: fr.result, name: f.name }, function () { status('壁纸已更新 updated'); });
@@ -169,7 +171,7 @@ export function buildPanelScript(apiPort: number): string {
   $('zb-reset').addEventListener('click', function () {
     post('/api/reset', {}, function () {
       try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
-      status('已还原 reset');
+      status('已还原默认外观');
     });
   });
 
@@ -179,6 +181,9 @@ export function buildPanelScript(apiPort: number): string {
     if (!p.hidden) refresh();
   });
   $('zb-close').addEventListener('click', function () { $('zb-panel').hidden = true; });
+
+  // Fill in the fit label (and control values) right away, not just on open.
+  refresh();
 
   (function () {
     var head = $('zb-head'), panel = $('zb-panel');
