@@ -20,5 +20,11 @@ The user wants to beautify the ZCode desktop client. $ARGUMENTS
    `node <plugin-root>/dist/cli.js launch`
    (this restarts ZCode with `--remote-debugging-port=9222` — unsaved work in
    other apps is not affected, ZCode sessions are persisted), then retry.
-5. **Report the result** and mention that `dim` (0-100) and `blur` (px) can be
-   tuned, and `reset_appearance` restores the default look.
+5. **Fine-tune without changing the image** using the `apply_options` MCP tool
+   (`blur` / `dim` / `monet` / `wallpaper_visible`) when the user asks to adjust
+   the look — no need to re-send the image.
+6. **Report the result** and mention:
+   - `node <plugin-root>/dist/cli.js serve` keeps a draggable settings panel
+     inside ZCode for live tuning (blur/dim sliders, Monet toggle, wallpaper
+     swap, reset);
+   - `reset_appearance` restores the default look.

@@ -6,7 +6,8 @@
  * requestSingleInstanceLock, so we detect an already-running instance first.
  */
 
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
+import { promisify } from "node:util";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -63,6 +64,28 @@ export function findZcodeExecutable(): string | undefined {
   });
 }
 
+const execFileAsync = promisify(execFile);
+
+/**
+ * Detects a live ZCode process. A running instance without the debug port
+ * triggers the Electron single-instance lock: a newly spawned ZCode binds the
+ * CDP port, forwards its args to the existing instance, then exits — closing
+ * the port again. Launching must refuse upfront instead of racing that window.
+ */
+export async function isZcodeProcessRunning(): Promise<boolean> {
+  try {
+    if (process.platform === "win32") {
+      const { stdout } = await execFileAsync("tasklist", ["/NH", "/FI", "IMAGENAME eq ZCode.exe"]);
+      return stdout.toLowerCase().includes("zcode.exe");
+    }
+    const name = process.platform === "darwin" ? "ZCode" : "zcode";
+    const { stdout } = await execFileAsync("pgrep", ["-x", name]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false; // pgrep exits non-zero when no process matches
+  }
+}
+
 export interface LaunchResult {
   started: boolean;
   reason?: string;
@@ -84,6 +107,10 @@ export async function launchZcode(port: number): Promise<LaunchResult> {
   const exe = findZcodeExecutable();
   if (!exe) throw new Error("ZCode executable not found; set ZCODE_WINDOWS_APP_INSTALL_DIR or install ZCode to the default path.");
 
+  if (await isZcodeProcessRunning()) {
+    return { started: false, reason: "running-without-cdp" };
+  }
+
   const child = spawn(exe, [`--remote-debugging-port=${port}`], {
     detached: true,
     stdio: "ignore",
@@ -92,16 +119,32 @@ export async function launchZcode(port: number): Promise<LaunchResult> {
   child.unref();
 
   // Wait for the CDP endpoint to come up.
+  let up = false;
   for (let i = 0; i < 40; i++) {
     await new Promise((r) => setTimeout(r, 500));
     try {
       await listTargets(port);
-      return { started: true };
+      up = true;
+      break;
     } catch {
       /* keep waiting */
     }
   }
-  throw new Error(
-    "ZCode was started but no CDP endpoint appeared. Another instance may already be running without the debug port — quit ZCode completely and run `zcode-beautify launch` again."
-  );
+  if (!up) {
+    throw new Error(
+      "ZCode was started but no CDP endpoint appeared. Another instance may already be running without the debug port — quit ZCode completely and run `zcode-beautify launch` again."
+    );
+  }
+
+  // Confirm the endpoint stays up: a second instance racing the single-instance
+  // lock binds the port briefly and then quits, which would look like success.
+  await new Promise((r) => setTimeout(r, 2000));
+  try {
+    await listTargets(port);
+  } catch {
+    throw new Error(
+      "CDP came up but closed again immediately — a running ZCode instance took over via the single-instance lock. Quit ZCode completely and run `zcode-beautify launch` again."
+    );
+  }
+  return { started: true };
 }

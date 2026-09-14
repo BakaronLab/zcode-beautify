@@ -166,6 +166,13 @@ export function buildBootstrapScript(payload: InjectionPayload): string {
   } else if (wp) {
     wp.remove();
   }
+
+  // Persist for the panel's self-heal path (best effort; large wallpapers may
+  // exceed the localStorage quota, in which case only the CSS is saved).
+  try {
+    localStorage.setItem(MARKER + ':css', ${JSON.stringify(payload.css)});
+    localStorage.setItem(MARKER + ':wallpaper', ${JSON.stringify(payload.wallpaperDataUri ?? "")});
+  } catch (e) {}
 })();`;
 }
 

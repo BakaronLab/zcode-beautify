@@ -6,7 +6,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { applyWallpaper, reapplyStored, resetAppearance } from "../core/session.js";
+import { applyColorsOnly, applyWallpaper, reapplyStored, resetAppearance } from "../core/session.js";
 import { loadConfig } from "../core/launch.js";
 
 const server = new McpServer({
@@ -30,6 +30,29 @@ server.registerTool(
     try {
       const { windows } = await applyWallpaper(image_path, { blur, dim });
       return { content: [{ type: "text", text: `Wallpaper applied to ${windows} window(s) with Monet-adapted colors.` }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `Failed: ${(err as Error).message}` }], isError: true };
+    }
+  }
+);
+
+server.registerTool(
+  "apply_options",
+  {
+    title: "Tune ZCode appearance",
+    description:
+      "Adjust the live ZCode appearance without changing the wallpaper: blur radius, dim level, Monet dynamic colors on/off, and wallpaper visibility (translucent vs opaque surfaces). Only the provided values change; the rest keep their current setting.",
+    inputSchema: {
+      blur: z.number().min(0).max(100).optional().describe("Wallpaper blur radius in px"),
+      dim: z.number().min(0).max(100).optional().describe("Wallpaper darkening 0-100"),
+      monet: z.boolean().optional().describe("Regenerate UI colors from the wallpaper (true) or keep ZCode's original colors (false)"),
+      wallpaper_visible: z.boolean().optional().describe("Translucent surfaces showing the wallpaper (true) or opaque surfaces (false)"),
+    },
+  },
+  async ({ blur, dim, monet, wallpaper_visible }) => {
+    try {
+      const windows = await applyColorsOnly({ blur, dim, monet, wallpaperVisible: wallpaper_visible });
+      return { content: [{ type: "text", text: `Appearance updated in ${windows} window(s).` }] };
     } catch (err) {
       return { content: [{ type: "text", text: `Failed: ${(err as Error).message}` }], isError: true };
     }

@@ -27,6 +27,7 @@ Commands:
   reset [--port N]               Remove wallpaper and color overrides
   status [--port N]              Show CDP reachability and renderer targets
   watch [--port N]               Watch mode: re-inject whenever ZCode (re)starts
+  serve [--port N] [--api-port M]  Watch mode + settings panel + local API (default API port 9223)
 `;
 
 async function main(): Promise<void> {
@@ -42,7 +43,18 @@ async function main(): Promise<void> {
     switch (cmd) {
       case "launch": {
         const r = await launchZcode(port);
-        console.log(r.started ? `ZCode started with CDP on port ${port}.` : `ZCode already reachable on port ${port}.`);
+        if (r.started) {
+          console.log(`ZCode started with CDP on port ${port}.`);
+        } else if (r.reason === "running-without-cdp") {
+          console.error(
+            `A ZCode instance is already running without the debug port, so the single-instance lock ` +
+              `would immediately close the new process's CDP port.\n` +
+              `Quit ZCode completely (including any tray icon), then run \`zcode-beautify launch\` again.`
+          );
+          process.exitCode = 1;
+        } else {
+          console.log(`ZCode already reachable on port ${port}.`);
+        }
         break;
       }
       case "apply": {
@@ -86,6 +98,12 @@ async function main(): Promise<void> {
       }
       case "watch": {
         await watch(port);
+        break;
+      }
+      case "serve": {
+        const { startServe } = await import("./core/server.js");
+        const apiPort = Number(flag("--api-port") ?? 9223);
+        await startServe({ cdpPort: port, apiPort });
         break;
       }
       default:

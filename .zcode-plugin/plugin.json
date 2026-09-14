@@ -6,6 +6,7 @@
     "name": "Logocceai"
   },
   "license": "MIT",
+  "repository": "https://github.com/Logocceai/zcode-beautify",
   "commands": "commands",
   "skills": "skills",
   "mcpServers": {

@@ -1,51 +1,111 @@
 # zcode-beautify
 
-ZCode 桌面客户端的开源美化插件：支持背景图片导入替换，并使用莫奈取色（Material Design 3 动态配色）对 ZCode UI 颜色进行全局适配。
+[English](README.md) | [中文](README.zh-CN.md)
 
-- 创建日期：2026-09-14
-- 技术栈：TypeScript、Node.js ≥ 20、Chrome DevTools Protocol（CDP）、@material/material-color-utilities
-- 许可证：MIT
+Beautify the **ZCode desktop client**: use any image as a background wallpaper and adapt the whole UI with Material Design 3 (Monet) dynamic color — plus a live settings panel for real-time tuning.
 
-## 原理
+![screenshot placeholder — replace docs/screenshot.png](docs/screenshot.png)
 
-ZCode 桌面端（Electron）默认开启 CDP 调试端口 9229，且 UI 主题完全由 Tailwind v4 的 `--color-*` CSS 自定义属性驱动。本插件通过 CDP 向 renderer 注入 CSS/JS：
+## Features
 
-1. 注入固定定位的壁纸层（图片以 data URI 嵌入）；
-2. 将背景类 `--color-*` 变量改为透明/半透明，前景面板加半透明模糊遮罩；
-3. 用 Google 官方 MD3 算法从壁纸提取 source color，生成 light/dark 双套调色板并映射覆盖 ZCode 的语义 token；
-4. MutationObserver 监听 `.dark` class 切换，自动在两套 scheme 间切换。
+- **Wallpaper** — any local image becomes a fixed background layer behind the UI.
+- **Monet theming** — a source color is extracted from the wallpaper with Google's official MD3 algorithm; light/dark palettes are mapped onto ZCode's semantic CSS variables (35+ tokens).
+- **Live settings panel** — a draggable panel inside ZCode with blur/dim sliders, Monet and wallpaper-visibility toggles, one-click wallpaper swap, and reset. Changes preview instantly and persist.
+- **Conversation control** — bundled slash command `/beautify` and MCP tools let the ZCode agent set the wallpaper or tune the theme on your behalf.
+- **Self-healing** — while `serve` runs, the theme survives renderer reloads automatically; the last look is also cached in `localStorage` as a fallback.
 
-不修改任何安装文件，ZCode 升级不受影响。
+## How it works
 
-## 运行方式
+ZCode is an Electron app whose UI theming is driven by Tailwind v4 `--color-*` CSS custom properties, and production builds start **without** a debug port. This plugin:
 
-依赖：Node.js ≥ 20（需系统安装 node 并在 PATH 中）。
+1. starts ZCode with `--remote-debugging-port=9222` (one-time `launch`);
+2. connects over the Chrome DevTools Protocol and injects CSS/JS into the renderer:
+   - a fixed-position wallpaper layer (image embedded as data URI),
+   - translucent background variables so the wallpaper shows through,
+   - MD3 light/dark palettes overriding ZCode's semantic tokens;
+3. keeps the injection sessions open (`serve`) so the theme and the settings panel survive renderer reloads.
+
+It never modifies ZCode's installation files, so ZCode upgrades are unaffected.
+
+## Requirements
+
+- Node.js ≥ 20 available on your PATH.
+- ZCode desktop client (Windows / macOS / Linux).
+
+## Install
+
+### Option A — ZCode plugin marketplace (recommended)
+
+1. Open ZCode → **Settings → Plugin Management → Discover**.
+2. Click **+** and add this repository (GitHub URL or a local clone path).
+3. Click **Get** on the *zcode-beautify* card. The `/beautify` command and MCP tools are available immediately.
+
+The published repo ships prebuilt single-file bundles in `dist/`, so no build step is needed on your machine.
+
+### Option B — clone and run
+
+```bash
+git clone https://github.com/Logocceai/zcode-beautify.git
+cd zcode-beautify
+node dist/cli.js --help        # prebuilt bundle, zero install
+```
+
+## Quick start
+
+```bash
+# 1) Quit ZCode completely, then start it with the CDP debug port (one-time).
+node dist/cli.js launch
+
+# 2) Set a wallpaper with Monet adaptation
+node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
+
+# 3) (Recommended) Keep the theme alive + get the live settings panel
+node dist/cli.js serve
+```
+
+With `serve` running, a 🎨 button appears in the bottom-right corner of ZCode. Open it to tune blur/dim live, toggle Monet colors or wallpaper translucency, swap the wallpaper image, or reset — everything previews instantly and is saved automatically.
+
+You can also just type `/beautify <image path>` in ZCode and let the agent do it, then say things like "make it blurrier" (handled by the `apply_options` MCP tool).
+
+## CLI reference
+
+| Command | Purpose |
+|---|---|
+| `launch [--port N]` | Start ZCode with `--remote-debugging-port` (quit ZCode first) |
+| `apply <image> [--blur] [--dim] [--no-monet]` | Set wallpaper + adapt colors |
+| `colors` | Re-apply the stored theme without changing the image |
+| `serve [--api-port M]` | Watch mode + settings panel + local control API (default API port 9223) |
+| `watch` | Headless watch mode: re-inject whenever ZCode restarts |
+| `reset` | Remove wallpaper and color overrides |
+| `status` | Show CDP reachability and renderer targets |
+
+## MCP tools
+
+| Tool | Purpose |
+|---|---|
+| `set_background` | Set wallpaper + Monet colors |
+| `apply_options` | Tune blur/dim/monet/wallpaper visibility without re-sending the image |
+| `refresh_theme` | Re-inject the stored theme after a restart |
+| `reset_appearance` | Remove wallpaper and overrides |
+| `beautify_status` | Show the stored config |
+
+## Development
 
 ```bash
 npm install
-npm run build
-
-# 1) 以 CDP 调试端口启动 ZCode（ZCode 需完全退出后执行；会话会保留）
-node dist/cli.js launch
-
-# 2) 设置壁纸并自动适配配色
-node dist/cli.js apply D:\pictures\wallpaper.jpg --blur 6 --dim 30
-
-# 3) （可选）守护模式：ZCode 重启后自动重新注入
-node dist/cli.js watch
-
-# 还原默认外观
-node dist/cli.js reset
+npm run build    # type-check + compile to dist/
+npm run bundle   # prebuilt single-file bundles (what the repo ships)
 ```
 
-作为 ZCode 插件使用时，把本目录复制或链接到
-`~/.zcode/cli/plugins/cache/local/zcode-beautify/<version>/`，
-即可获得 `/beautify` 命令与 `set_background` 等 MCP 工具，在对话中直接说
-"把这张图设为背景"即可。
+`dist/` is committed so users never need to build. If you change `src/`, run `npm run bundle` and commit the updated bundles.
 
-## 风险声明
+## Risks & limitations
 
-- 本插件通过 CDP（Chrome DevTools 协议）向运行中的 ZCode 注入 CSS/JS，属
-  非官方手段，效果可能随 ZCode 版本变化而失效；`reset` 可随时还原。
-- `launch` 需要重启 ZCode 一次；之后的每次 ZCode 重启都会丢失注入（CDP 会话
-  作用域），建议配合 `watch` 守护模式或在对话中使用 `refresh_theme`。
+- Injection happens over CDP — an **unofficial** mechanism. Updates to ZCode may break it; `reset` always restores the default look.
+- `launch` restarts ZCode once. Without `serve`/`watch` running, the theme is lost on every ZCode restart (CDP sessions are scoped to the connection).
+- Functional colors (success/warning/destructive) are intentionally left untouched.
+- The control API binds to `127.0.0.1` only and accepts requests from any local process by design (the injected panel needs CORS).
+
+## License
+
+MIT
