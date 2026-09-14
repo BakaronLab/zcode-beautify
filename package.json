@@ -1,0 +1,27 @@
+{
+  "name": "zcode-beautify",
+  "version": "0.1.0",
+  "description": "Open-source beautification plugin for the ZCode desktop client: custom wallpaper + Material Design 3 (Monet) dynamic theming via CDP injection.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Logocceai",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "bin": {
+    "zcode-beautify": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "dependencies": {
+    "@material/material-color-utilities": "^0.3.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "jimp": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
