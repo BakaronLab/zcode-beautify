@@ -110088,8 +110088,8 @@ function buildPanelScript(apiPort) {
     '#zb-panel input[type=range] { width: 100%; accent-color: #7aa2f7; height: 18px; margin: 0; cursor: pointer; }',
     '.zb-toggles { display: flex; justify-content: center; gap: 16px; }',
     '.zb-toggles label { display: flex; align-items: center; gap: 5px; margin: 0; cursor: pointer; }',
-    '.zb-actions { display: flex; gap: 8px; }',
-    '.zb-btn { flex: 1; text-align: center; padding: 6px 0; border-radius: 7px; cursor: pointer;',
+    '.zb-actions { display: flex; justify-content: center; gap: 10px; }',
+    '.zb-btn { display: inline-block; padding: 6px 20px; text-align: center; border-radius: 999px; cursor: pointer;',
       ' background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); color: inherit; font-size: 12px; }',
     '.zb-btn:hover { background: rgba(255,255,255,.16); }',
     '#zb-status { min-height: 14px; padding: 2px 12px 0; opacity: .6; font-size: 11px; }'
@@ -110111,12 +110111,12 @@ function buildPanelScript(apiPort) {
     '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
     '    <div class="zb-row"><label title="\u80CC\u666F\u538B\u6697\u7A0B\u5EA6(\u767E\u5206\u6BD4,\u8D8A\u9AD8\u8D8A\u6697)"><span>\u80CC\u666F\u538B\u6697</span><span><span id="zb-dim-val">0</span>%</span></label>' +
     '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
-    '    <div class="zb-row">' +
-    '      <button class="zb-btn" id="zb-fit" title="\u80CC\u666F\u586B\u5145\u65B9\u5F0F:\u586B\u6EE1\u88C1\u526A\u94FA\u6EE1\u7A97\u53E3 / \u5B8C\u6574\u663E\u793A\u4E0D\u88C1\u526A(\u6A21\u7CCA\u57AB\u5E95)/ \u667A\u80FD\u9002\u914D\u81EA\u52A8\u5206\u6790\u753B\u9762\u4E3B\u4F53"></button>' +
-    '    </div>' +
     '    <div class="zb-row zb-toggles">' +
     '      <label title="\u6839\u636E\u58C1\u7EB8\u81EA\u52A8\u751F\u6210 UI \u914D\u8272;\u5173\u95ED\u5219\u4FDD\u7559 ZCode \u539F\u751F\u989C\u8272"><input type="checkbox" id="zb-monet">UI \u83AB\u5948\u53D6\u8272</label>' +
     '      <label title="\u663E\u793A\u6216\u9690\u85CF\u80CC\u666F\u58C1\u7EB8"><input type="checkbox" id="zb-vis">\u663E\u793A\u58C1\u7EB8</label>' +
+    '    </div>' +
+    '    <div class="zb-row zb-actions">' +
+    '      <button class="zb-btn" id="zb-fit" title="\u80CC\u666F\u586B\u5145\u65B9\u5F0F:\u586B\u6EE1\u88C1\u526A\u94FA\u6EE1\u7A97\u53E3 / \u5B8C\u6574\u663E\u793A\u4E0D\u88C1\u526A(\u6A21\u7CCA\u57AB\u5E95)/ \u667A\u80FD\u9002\u914D\u81EA\u52A8\u5206\u6790\u753B\u9762\u4E3B\u4F53"></button>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
     '      <label class="zb-btn" for="zb-file" title="\u9009\u62E9\u4E00\u5F20\u56FE\u7247\u4F5C\u4E3A\u80CC\u666F\u58C1\u7EB8,UI \u914D\u8272\u968F\u4E4B\u66F4\u65B0">\u66F4\u6362\u56FE\u7247\u2026</label>' +

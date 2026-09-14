@@ -43,8 +43,8 @@ export function buildPanelScript(apiPort: number): string {
     '#zb-panel input[type=range] { width: 100%; accent-color: #7aa2f7; height: 18px; margin: 0; cursor: pointer; }',
     '.zb-toggles { display: flex; justify-content: center; gap: 16px; }',
     '.zb-toggles label { display: flex; align-items: center; gap: 5px; margin: 0; cursor: pointer; }',
-    '.zb-actions { display: flex; gap: 8px; }',
-    '.zb-btn { flex: 1; text-align: center; padding: 6px 0; border-radius: 7px; cursor: pointer;',
+    '.zb-actions { display: flex; justify-content: center; gap: 10px; }',
+    '.zb-btn { display: inline-block; padding: 6px 20px; text-align: center; border-radius: 999px; cursor: pointer;',
       ' background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); color: inherit; font-size: 12px; }',
     '.zb-btn:hover { background: rgba(255,255,255,.16); }',
     '#zb-status { min-height: 14px; padding: 2px 12px 0; opacity: .6; font-size: 11px; }'
@@ -66,12 +66,12 @@ export function buildPanelScript(apiPort: number): string {
     '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
     '    <div class="zb-row"><label title="背景压暗程度(百分比,越高越暗)"><span>背景压暗</span><span><span id="zb-dim-val">0</span>%</span></label>' +
     '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
-    '    <div class="zb-row">' +
-    '      <button class="zb-btn" id="zb-fit" title="背景填充方式:填满裁剪铺满窗口 / 完整显示不裁剪(模糊垫底)/ 智能适配自动分析画面主体"></button>' +
-    '    </div>' +
     '    <div class="zb-row zb-toggles">' +
     '      <label title="根据壁纸自动生成 UI 配色;关闭则保留 ZCode 原生颜色"><input type="checkbox" id="zb-monet">UI 莫奈取色</label>' +
     '      <label title="显示或隐藏背景壁纸"><input type="checkbox" id="zb-vis">显示壁纸</label>' +
+    '    </div>' +
+    '    <div class="zb-row zb-actions">' +
+    '      <button class="zb-btn" id="zb-fit" title="背景填充方式:填满裁剪铺满窗口 / 完整显示不裁剪(模糊垫底)/ 智能适配自动分析画面主体"></button>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
     '      <label class="zb-btn" for="zb-file" title="选择一张图片作为背景壁纸,UI 配色随之更新">更换图片…</label>' +
