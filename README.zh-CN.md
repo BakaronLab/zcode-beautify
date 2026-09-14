@@ -124,6 +124,10 @@ npm run bundle   # 预构建单文件产物(仓库随附)
 
 `dist/` 已提交入库,用户无需构建。修改 `src/` 后请运行 `npm run bundle` 并提交更新后的产物。
 
+## 技能包(`skill-pack/`)
+
+`skill-pack/` 是一份自包含、平台无关的 AI 编码智能体技能包(Claude、DeepSeek、Codex、豆包……均可):把文件夹交给任意智能体,它就能为**任意** Electron 应用重建这套美化能力——CDP 通道、MD3 取色、注入模板、实时调参 API,以及来自实战的踩坑清单。与本仓库同步版本。可从 [Releases 页面](https://github.com/Logocceai/zcode-beautify/releases)下载 zip,或直接阅读 [`skill-pack/SKILL.md`](skill-pack/SKILL.md)。
+
 ## 风险与限制
 
 - 注入通过 CDP(Chrome DevTools 协议)实现,属**非官方**手段,ZCode 更新可能使其失效;`reset` 可随时还原默认外观。

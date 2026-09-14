@@ -127,6 +127,16 @@ npm run bundle   # prebuilt single-file bundles (what the repo ships)
 
 `dist/` is committed so users never need to build. If you change `src/`, run `npm run bundle` and commit the updated bundles.
 
+## Skill pack (`skill-pack/`)
+
+`skill-pack/` is a self-contained, platform-agnostic skill for AI coding agents
+(Claude, DeepSeek, Codex, Doubao, …): hand the folder to any agent and it can
+rebuild this beautify capability for **any** Electron app — the CDP plumbing,
+MD3 color extraction, injection templates, live-tuning API, and the pitfall
+list gathered from production. Versioned together with this repo. Grab it from
+the [releases page](https://github.com/Logocceai/zcode-beautify/releases) as a
+zip, or read [`skill-pack/SKILL.md`](skill-pack/SKILL.md) directly.
+
 ## Risks & limitations
 
 - Injection happens over CDP — an **unofficial** mechanism. Updates to ZCode may break it; `reset` always restores the default look.
