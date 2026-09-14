@@ -11,7 +11,7 @@ import { loadConfig } from "../core/launch.js";
 
 const server = new McpServer({
   name: "zcode-beautify",
-  version: "0.1.0",
+  version: "0.2.0",
 });
 
 server.registerTool(

@@ -144544,7 +144544,6 @@ html, body { background: transparent !important; }
   return {
     css: parts.join("\n"),
     wallpaperDataUri,
-    assets,
     fit: config2.wallpaperVisible ? resolved : "cover",
     focusX,
     focusY
@@ -144677,7 +144676,7 @@ function mergedConfig() {
 // dist/mcp/server.js
 var server = new McpServer({
   name: "zcode-beautify",
-  version: "0.1.0"
+  version: "0.2.0"
 });
 server.registerTool("set_background", {
   title: "Set ZCode wallpaper",

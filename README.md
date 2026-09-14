@@ -4,7 +4,7 @@
 
 Beautify the **ZCode desktop client**: use any image as a background wallpaper and adapt the whole UI with Material Design 3 (Monet) dynamic color — plus a live settings panel for real-time tuning.
 
-![screenshot placeholder — replace docs/screenshot.png](docs/screenshot.png)
+> 📷 Screenshot welcome — PRs adding one to `docs/screenshot.png` are appreciated.
 
 ## Features
 
@@ -88,6 +88,34 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 | `refresh_theme` | Re-inject the stored theme after a restart |
 | `reset_appearance` | Remove wallpaper and overrides |
 | `beautify_status` | Show the stored config |
+
+## Project structure
+
+```
+├─ src/
+│  ├─ cli.ts                 # CLI entry: launch / apply / colors / reset / status / watch / serve
+│  ├─ core/
+│  │  ├─ cdp.ts              # Minimal Chrome DevTools Protocol client + injection scripts
+│  │  ├─ inject.ts           # Assembles the injected payload (wallpaper CSS + token overrides)
+│  │  ├─ launch.ts           # Config persistence + ZCode launcher (single-instance aware)
+│  │  ├─ monet.ts            # Image decode, MD3 source-color extraction, smart-fit analysis
+│  │  ├─ server.ts           # `serve` mode: localhost control API + persistent injection sessions
+│  │  ├─ session.ts          # Shared apply/reset operations used by CLI and MCP
+│  │  └─ tokens.ts           # MD3 schemes → ZCode's Tailwind v4 --color-* variables
+│  ├─ panel/panelScript.ts   # The injected settings panel (DOM + CSS + logic)
+│  └─ mcp/server.ts          # MCP server exposing tools to the ZCode agent
+├─ commands/beautify.md      # /beautify slash command
+├─ skills/beautify/SKILL.md  # Agent-facing workflow documentation
+├─ .zcode-plugin/plugin.json # ZCode plugin manifest (commands, skills, MCP server)
+├─ marketplace.json          # Marketplace index so the repo is discoverable in ZCode
+├─ scripts/bundle.mjs        # esbuild bundling (dist/ = self-contained, committed)
+└─ dist/                     # Prebuilt cli.js + mcp/server.js — no build step needed
+```
+
+User data lives in `~/.zcode/cli/plugins/data/zcode-beautify/`: `config.json`
+(live configuration), `config.backup.json` (what 还原/Reset remembers for
+restore), and `wallpaper.*` (a copy of your image so the theme survives the
+original file moving or being deleted).
 
 ## Development
 

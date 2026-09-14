@@ -7,11 +7,11 @@
  *   colors   Re-apply Monet colors only (no wallpaper change).
  *   reset    Restore ZCode's default appearance.
  *   watch    Keep re-injecting: survives ZCode restarts while this process lives.
+ *   serve    Watch mode + settings panel + local control API.
  */
 
-import { applyToZCode, buildPayload, resetZCode, type BeautifyConfig } from "./core/inject.js";
+import { applyToZCode, type BeautifyConfig } from "./core/inject.js";
 import type { ApplyOptions } from "./core/session.js";
-import { loadWallpaper } from "./core/monet.js";
 import { launchZcode } from "./core/launch.js";
 import { applyWallpaper, resetAppearance } from "./core/session.js";
 
@@ -109,8 +109,14 @@ async function main(): Promise<void> {
         await startServe({ cdpPort: port, apiPort });
         break;
       }
+      case "help":
+      case "--help":
+      case "-h":
+        console.log(USAGE);
+        break;
       default:
         console.log(USAGE);
+        if (cmd !== undefined) process.exitCode = 1;
     }
   } catch (err) {
     console.error(`error: ${(err as Error).message}`);

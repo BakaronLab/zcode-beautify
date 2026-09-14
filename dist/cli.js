@@ -109812,7 +109812,6 @@ html, body { background: transparent !important; }
   return {
     css: parts.join("\n"),
     wallpaperDataUri,
-    assets,
     fit: config.wallpaperVisible ? resolved : "cover",
     focusX,
     focusY
@@ -110669,8 +110668,15 @@ Quit ZCode completely (including any tray icon), then run \`zcode-beautify launc
         await startServe2({ cdpPort: port, apiPort });
         break;
       }
+      case "help":
+      case "--help":
+      case "-h":
+        console.log(USAGE);
+        break;
       default:
         console.log(USAGE);
+        if (cmd !== void 0)
+          process.exitCode = 1;
     }
   } catch (err) {
     console.error(`error: ${err.message}`);

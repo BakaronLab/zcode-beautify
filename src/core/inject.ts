@@ -31,7 +31,6 @@ export const DEFAULT_CONFIG: BeautifyConfig = {
 export interface BuiltPayload {
   css: string;
   wallpaperDataUri?: string;
-  assets?: WallpaperAssets;
   /** How the wallpaper layer is framed; "contain" adds a blurred backdrop. */
   fit: "cover" | "contain";
   /** Normalized focus point for background-position. */
@@ -103,7 +102,6 @@ html, body { background: transparent !important; }
   return {
     css: parts.join("\n"),
     wallpaperDataUri,
-    assets,
     fit: config.wallpaperVisible ? resolved : "cover",
     focusX,
     focusY,

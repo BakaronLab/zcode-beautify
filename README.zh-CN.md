@@ -4,7 +4,7 @@
 
 美化 **ZCode 桌面客户端**：任意图片一键设为背景壁纸，并用 Material Design 3（莫奈取色）动态配色适配整个 UI——还附带实时悬浮设置面板。
 
-![截图占位 —— 替换 docs/screenshot.png](docs/screenshot.png)
+> 📷 欢迎贡献截图——向 `docs/screenshot.png` 提 PR 即可。
 
 ## 功能
 
@@ -88,6 +88,31 @@ node dist/cli.js serve
 | `refresh_theme` | 重启后重注入已存主题 |
 | `reset_appearance` | 移除壁纸与覆盖,还原默认 |
 | `beautify_status` | 查看已存配置 |
+
+## 项目结构
+
+```
+├─ src/
+│  ├─ cli.ts                 # CLI 入口:launch / apply / colors / reset / status / watch / serve
+│  ├─ core/
+│  │  ├─ cdp.ts              # 精简 Chrome DevTools Protocol 客户端 + 注入脚本
+│  │  ├─ inject.ts           # 装配注入载荷(壁纸层 CSS + token 覆盖)
+│  │  ├─ launch.ts           # 配置持久化 + ZCode 启动器(感知单实例锁)
+│  │  ├─ monet.ts            # 图片解码、MD3 取色、智能适配(smart fit)分析
+│  │  ├─ server.ts           # serve 模式:本地控制 API + 持久注入会话
+│  │  ├─ session.ts          # CLI 与 MCP 共用的应用/还原操作
+│  │  └─ tokens.ts           # MD3 调色板 → ZCode 的 Tailwind v4 --color-* 变量映射
+│  ├─ panel/panelScript.ts   # 注入式设置面板(DOM + CSS + 逻辑)
+│  └─ mcp/server.ts          # 向 ZCode 智能体暴露工具的 MCP 服务
+├─ commands/beautify.md      # /beautify 斜杠命令
+├─ skills/beautify/SKILL.md  # 面向智能体的工作流文档
+├─ .zcode-plugin/plugin.json # ZCode 插件清单(命令、技能、MCP 服务)
+├─ marketplace.json          # 市场索引,让仓库可在 ZCode 插件市场被发现
+├─ scripts/bundle.mjs        # esbuild 打包(dist/ 为自包含产物,已入库)
+└─ dist/                     # 预构建 cli.js + mcp/server.js —— 用户零构建
+```
+
+用户数据位于 `~/.zcode/cli/plugins/data/zcode-beautify/`:`config.json`(当前配置)、`config.backup.json`(还原时记住的壁纸备份)、`wallpaper.*`(壁纸副本,原图移动或删除后主题依然有效)。
 
 ## 开发
 
