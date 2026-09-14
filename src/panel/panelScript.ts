@@ -62,21 +62,21 @@ export function buildPanelScript(apiPort: number): string {
     '<div id="zb-panel" hidden>' +
     '  <div id="zb-head"><span>ZCode Beautify</span><span id="zb-close">✕</span></div>' +
     '  <div id="zb-body">' +
-    '    <div class="zb-row"><label><span>Blur</span><span><span id="zb-blur-val">0</span>px</span></label>' +
+    '    <div class="zb-row"><label><span>模糊 Blur</span><span><span id="zb-blur-val">0</span>px</span></label>' +
     '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
-    '    <div class="zb-row"><label><span>Dim</span><span><span id="zb-dim-val">0</span>%</span></label>' +
+    '    <div class="zb-row"><label><span>压暗 Dim</span><span><span id="zb-dim-val">0</span>%</span></label>' +
     '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
     '    <div class="zb-row zb-toggles">' +
-    '      <label><input type="checkbox" id="zb-monet"> Monet</label>' +
-    '      <label><input type="checkbox" id="zb-vis"> Wallpaper</label>' +
+    '      <label><input type="checkbox" id="zb-monet">莫奈 Monet</label>' +
+    '      <label><input type="checkbox" id="zb-vis">壁纸 Wallpaper</label>' +
     '    </div>' +
     '    <div class="zb-row">' +
-    '      <button class="zb-btn" id="zb-fit" title="Framing: cover fills and crops, contain letterboxes with a blurred backdrop, smart analyzes the picture locally">Fit: cover</button>' +
+    '      <button class="zb-btn" id="zb-fit" title="cover 填满裁剪 / contain 完整显示(模糊底)/ smart 智能分析主体自动取景"></button>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <label class="zb-btn" for="zb-file">Change image…</label>' +
+    '      <label class="zb-btn" for="zb-file">更换图片 Image…</label>' +
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
-    '      <button class="zb-btn" id="zb-reset">Reset</button>' +
+    '      <button class="zb-btn" id="zb-reset">还原 Reset</button>' +
     '    </div>' +
     '  </div>' +
     '</div>' +
@@ -94,7 +94,7 @@ export function buildPanelScript(apiPort: number): string {
     fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (d) { if (cb) cb(d); })
-      .catch(function () { status('beautify service unreachable'); });
+      .catch(function () { status('无法连接美化服务 service unreachable'); });
   }
 
   // Local live preview; the server re-injects the authoritative CSS right after.
@@ -115,7 +115,7 @@ export function buildPanelScript(apiPort: number): string {
         dim: Number($('zb-dim').value),
         monet: $('zb-monet').checked,
         wallpaperVisible: $('zb-vis').checked
-      }, function (d) { status(d && d.windows > 0 ? 'applied' : 'saved (ZCode not reachable)'); });
+      }, function (d) { status(d && d.windows > 0 ? '已应用 applied' : '已保存(ZCode 未连接)'); });
     }, 300);
   }
 
@@ -127,10 +127,9 @@ export function buildPanelScript(apiPort: number): string {
         $('zb-dim').value = c.dim; $('zb-dim-val').textContent = c.dim;
         $('zb-monet').checked = !!c.monet;
         $('zb-vis').checked = !!c.wallpaperVisible;
-        $('zb-fit').textContent = 'Fit: ' + (c.fit || 'cover');
-        $('zb-fit').setAttribute('data-fit', c.fit || 'cover');
+        $('zb-fit') && applyFitLabel($('zb-fit'), c.fit || 'cover');
       })
-      .catch(function () { status('beautify service unreachable'); });
+      .catch(function () { status('无法连接美化服务 service unreachable'); });
   }
 
   $('zb-blur').addEventListener('input', function () {
@@ -143,22 +142,26 @@ export function buildPanelScript(apiPort: number): string {
   $('zb-vis').addEventListener('change', pushConfig);
 
   var FITS = ['cover', 'contain', 'smart'];
+  var FIT_LABELS = { cover: '填满 cover', contain: '完整 contain', smart: '智能 smart' };
+  function applyFitLabel(btn, fit) {
+    btn.textContent = '取景 Fit: ' + (FIT_LABELS[fit] || fit);
+    btn.setAttribute('data-fit', fit);
+  }
   $('zb-fit').addEventListener('click', function () {
     var current = this.getAttribute('data-fit') || 'cover';
     var next = FITS[(FITS.indexOf(current) + 1) % FITS.length];
-    this.textContent = 'Fit: ' + next;
-    this.setAttribute('data-fit', next);
-    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? 'fit: ' + next : 'saved (ZCode not reachable)'); });
+    applyFitLabel(this, next);
+    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? '取景已应用 fit: ' + next : '已保存(ZCode 未连接)'); });
   });
 
   $('zb-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
     this.value = '';
     if (!f) return;
-    if (f.size > 20 * 1024 * 1024) { status('image too large (max 20 MB)'); return; }
+    if (f.size > 20 * 1024 * 1024) { status('图片过大,上限 20 MB max'); return; }
     var fr = new FileReader();
     fr.onload = function () {
-      post('/api/wallpaper', { dataUri: fr.result, name: f.name }, function () { status('wallpaper updated'); });
+      post('/api/wallpaper', { dataUri: fr.result, name: f.name }, function () { status('壁纸已更新 updated'); });
     };
     fr.readAsDataURL(f);
   });
@@ -166,7 +169,7 @@ export function buildPanelScript(apiPort: number): string {
   $('zb-reset').addEventListener('click', function () {
     post('/api/reset', {}, function () {
       try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
-      status('appearance reset');
+      status('已还原 reset');
     });
   });
 

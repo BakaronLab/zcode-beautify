@@ -109669,6 +109669,32 @@ function buildVariableOverrides(theme, opts) {
   return `${rootBlock(theme, opts)}
 .dark{${tokenRows(theme, "dark", opts).join("")}}`;
 }
+function buildTransparencyOverrides(opts) {
+  return `:root,:host{${transparencyRows("light", opts).join("")}}
+.dark{${transparencyRows("dark", opts).join("")}}`;
+}
+function transparencyRows(mode, opts) {
+  const rgb = mode === "light" ? LIGHT_SCRIM : DARK_SCRIM;
+  const baseAlpha = 0.72;
+  const panelAlpha = 0.62;
+  const inputAlpha = 0.5;
+  const popoverAlpha = 0.92;
+  return [
+    `--color-background:transparent;`,
+    `--color-background-alt:rgba(${rgb},${panelAlpha});`,
+    `--color-background-win-alt:rgba(${rgb},${panelAlpha});`,
+    `--color-panel:rgba(${rgb},${panelAlpha});`,
+    `--color-sidebar:rgba(${rgb},${panelAlpha});`,
+    `--color-surface:rgba(${rgb},${baseAlpha});`,
+    `--color-surface-hover:rgba(${rgb},${baseAlpha});`,
+    `--color-card:rgba(${rgb},${baseAlpha});`,
+    `--color-card-selected:rgba(${rgb},${Math.min(1, baseAlpha + 0.15)});`,
+    `--color-popover:rgba(${rgb},${popoverAlpha});`,
+    `--color-input:rgba(${rgb},${inputAlpha});`,
+    `--color-input-focused:rgba(${rgb},${Math.min(1, inputAlpha + 0.2)});`,
+    opts.dim > 0 ? `--zcode-beautify-dim:${opts.dim / 100};` : ""
+  ].filter(Boolean);
+}
 function rootBlock(theme, opts) {
   return `:root,:host{${tokenRows(theme, "light", opts).join("")}}`;
 }
@@ -109719,13 +109745,15 @@ function tokenRows(theme, mode, opts) {
     opts.dim > 0 ? `--zcode-beautify-dim:${opts.dim / 100};` : ""
   ].filter(Boolean);
 }
-var LIGHT_SURFACE_TONES, DARK_SURFACE_TONES;
+var LIGHT_SURFACE_TONES, DARK_SURFACE_TONES, LIGHT_SCRIM, DARK_SCRIM;
 var init_tokens = __esm({
   "dist/core/tokens.js"() {
     "use strict";
     init_monet();
     LIGHT_SURFACE_TONES = { lowest: 100, low: 96, container: 94, high: 92, highest: 90 };
     DARK_SURFACE_TONES = { lowest: 4, low: 10, container: 12, high: 17, highest: 22 };
+    LIGHT_SCRIM = "255,255,255";
+    DARK_SCRIM = "18,18,22";
   }
 });
 
@@ -109770,17 +109798,22 @@ html, body { background: transparent !important; }
   background: rgb(0 0 0 / var(--zcode-beautify-dim, ${config.dim / 100}));
 }`);
   }
-  if (assets && config.monet) {
-    parts.push(buildVariableOverrides(assets.theme, {
-      dim: config.dim,
-      wallpaperVisible: config.wallpaperVisible
-    }));
+  if (assets) {
+    if (config.monet) {
+      parts.push(buildVariableOverrides(assets.theme, {
+        dim: config.dim,
+        wallpaperVisible: config.wallpaperVisible
+      }));
+    } else if (config.wallpaperVisible) {
+      parts.push(buildTransparencyOverrides({ dim: config.dim }));
+    }
   }
+  const wallpaperDataUri = config.wallpaperVisible ? assets?.dataUri : void 0;
   return {
     css: parts.join("\n"),
-    wallpaperDataUri: assets?.dataUri,
+    wallpaperDataUri,
     assets,
-    fit: resolved,
+    fit: config.wallpaperVisible ? resolved : "cover",
     focusX,
     focusY
   };
@@ -110074,21 +110107,21 @@ function buildPanelScript(apiPort) {
     '<div id="zb-panel" hidden>' +
     '  <div id="zb-head"><span>ZCode Beautify</span><span id="zb-close">\u2715</span></div>' +
     '  <div id="zb-body">' +
-    '    <div class="zb-row"><label><span>Blur</span><span><span id="zb-blur-val">0</span>px</span></label>' +
+    '    <div class="zb-row"><label><span>\u6A21\u7CCA Blur</span><span><span id="zb-blur-val">0</span>px</span></label>' +
     '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
-    '    <div class="zb-row"><label><span>Dim</span><span><span id="zb-dim-val">0</span>%</span></label>' +
+    '    <div class="zb-row"><label><span>\u538B\u6697 Dim</span><span><span id="zb-dim-val">0</span>%</span></label>' +
     '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
     '    <div class="zb-row zb-toggles">' +
-    '      <label><input type="checkbox" id="zb-monet"> Monet</label>' +
-    '      <label><input type="checkbox" id="zb-vis"> Wallpaper</label>' +
+    '      <label><input type="checkbox" id="zb-monet">\u83AB\u5948 Monet</label>' +
+    '      <label><input type="checkbox" id="zb-vis">\u58C1\u7EB8 Wallpaper</label>' +
     '    </div>' +
     '    <div class="zb-row">' +
-    '      <button class="zb-btn" id="zb-fit" title="Framing: cover fills and crops, contain letterboxes with a blurred backdrop, smart analyzes the picture locally">Fit: cover</button>' +
+    '      <button class="zb-btn" id="zb-fit" title="cover \u586B\u6EE1\u88C1\u526A / contain \u5B8C\u6574\u663E\u793A(\u6A21\u7CCA\u5E95)/ smart \u667A\u80FD\u5206\u6790\u4E3B\u4F53\u81EA\u52A8\u53D6\u666F"></button>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <label class="zb-btn" for="zb-file">Change image\u2026</label>' +
+    '      <label class="zb-btn" for="zb-file">\u66F4\u6362\u56FE\u7247 Image\u2026</label>' +
     '      <input type="file" id="zb-file" accept="image/*" hidden>' +
-    '      <button class="zb-btn" id="zb-reset">Reset</button>' +
+    '      <button class="zb-btn" id="zb-reset">\u8FD8\u539F Reset</button>' +
     '    </div>' +
     '  </div>' +
     '</div>' +
@@ -110106,7 +110139,7 @@ function buildPanelScript(apiPort) {
     fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (d) { if (cb) cb(d); })
-      .catch(function () { status('beautify service unreachable'); });
+      .catch(function () { status('\u65E0\u6CD5\u8FDE\u63A5\u7F8E\u5316\u670D\u52A1 service unreachable'); });
   }
 
   // Local live preview; the server re-injects the authoritative CSS right after.
@@ -110127,7 +110160,7 @@ function buildPanelScript(apiPort) {
         dim: Number($('zb-dim').value),
         monet: $('zb-monet').checked,
         wallpaperVisible: $('zb-vis').checked
-      }, function (d) { status(d && d.windows > 0 ? 'applied' : 'saved (ZCode not reachable)'); });
+      }, function (d) { status(d && d.windows > 0 ? '\u5DF2\u5E94\u7528 applied' : '\u5DF2\u4FDD\u5B58(ZCode \u672A\u8FDE\u63A5)'); });
     }, 300);
   }
 
@@ -110139,10 +110172,9 @@ function buildPanelScript(apiPort) {
         $('zb-dim').value = c.dim; $('zb-dim-val').textContent = c.dim;
         $('zb-monet').checked = !!c.monet;
         $('zb-vis').checked = !!c.wallpaperVisible;
-        $('zb-fit').textContent = 'Fit: ' + (c.fit || 'cover');
-        $('zb-fit').setAttribute('data-fit', c.fit || 'cover');
+        $('zb-fit') && applyFitLabel($('zb-fit'), c.fit || 'cover');
       })
-      .catch(function () { status('beautify service unreachable'); });
+      .catch(function () { status('\u65E0\u6CD5\u8FDE\u63A5\u7F8E\u5316\u670D\u52A1 service unreachable'); });
   }
 
   $('zb-blur').addEventListener('input', function () {
@@ -110155,22 +110187,26 @@ function buildPanelScript(apiPort) {
   $('zb-vis').addEventListener('change', pushConfig);
 
   var FITS = ['cover', 'contain', 'smart'];
+  var FIT_LABELS = { cover: '\u586B\u6EE1 cover', contain: '\u5B8C\u6574 contain', smart: '\u667A\u80FD smart' };
+  function applyFitLabel(btn, fit) {
+    btn.textContent = '\u53D6\u666F Fit: ' + (FIT_LABELS[fit] || fit);
+    btn.setAttribute('data-fit', fit);
+  }
   $('zb-fit').addEventListener('click', function () {
     var current = this.getAttribute('data-fit') || 'cover';
     var next = FITS[(FITS.indexOf(current) + 1) % FITS.length];
-    this.textContent = 'Fit: ' + next;
-    this.setAttribute('data-fit', next);
-    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? 'fit: ' + next : 'saved (ZCode not reachable)'); });
+    applyFitLabel(this, next);
+    post('/api/config', { fit: next }, function (d) { status(d && d.windows > 0 ? '\u53D6\u666F\u5DF2\u5E94\u7528 fit: ' + next : '\u5DF2\u4FDD\u5B58(ZCode \u672A\u8FDE\u63A5)'); });
   });
 
   $('zb-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
     this.value = '';
     if (!f) return;
-    if (f.size > 20 * 1024 * 1024) { status('image too large (max 20 MB)'); return; }
+    if (f.size > 20 * 1024 * 1024) { status('\u56FE\u7247\u8FC7\u5927,\u4E0A\u9650 20 MB max'); return; }
     var fr = new FileReader();
     fr.onload = function () {
-      post('/api/wallpaper', { dataUri: fr.result, name: f.name }, function () { status('wallpaper updated'); });
+      post('/api/wallpaper', { dataUri: fr.result, name: f.name }, function () { status('\u58C1\u7EB8\u5DF2\u66F4\u65B0 updated'); });
     };
     fr.readAsDataURL(f);
   });
@@ -110178,7 +110214,7 @@ function buildPanelScript(apiPort) {
   $('zb-reset').addEventListener('click', function () {
     post('/api/reset', {}, function () {
       try { localStorage.removeItem('zcode-beautify:css'); localStorage.removeItem('zcode-beautify:wallpaper'); } catch (e) {}
-      status('appearance reset');
+      status('\u5DF2\u8FD8\u539F reset');
     });
   });
 

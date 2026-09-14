@@ -144402,6 +144402,34 @@ function buildVariableOverrides(theme, opts) {
   return `${rootBlock(theme, opts)}
 .dark{${tokenRows(theme, "dark", opts).join("")}}`;
 }
+function buildTransparencyOverrides(opts) {
+  return `:root,:host{${transparencyRows("light", opts).join("")}}
+.dark{${transparencyRows("dark", opts).join("")}}`;
+}
+var LIGHT_SCRIM = "255,255,255";
+var DARK_SCRIM = "18,18,22";
+function transparencyRows(mode, opts) {
+  const rgb = mode === "light" ? LIGHT_SCRIM : DARK_SCRIM;
+  const baseAlpha = 0.72;
+  const panelAlpha = 0.62;
+  const inputAlpha = 0.5;
+  const popoverAlpha = 0.92;
+  return [
+    `--color-background:transparent;`,
+    `--color-background-alt:rgba(${rgb},${panelAlpha});`,
+    `--color-background-win-alt:rgba(${rgb},${panelAlpha});`,
+    `--color-panel:rgba(${rgb},${panelAlpha});`,
+    `--color-sidebar:rgba(${rgb},${panelAlpha});`,
+    `--color-surface:rgba(${rgb},${baseAlpha});`,
+    `--color-surface-hover:rgba(${rgb},${baseAlpha});`,
+    `--color-card:rgba(${rgb},${baseAlpha});`,
+    `--color-card-selected:rgba(${rgb},${Math.min(1, baseAlpha + 0.15)});`,
+    `--color-popover:rgba(${rgb},${popoverAlpha});`,
+    `--color-input:rgba(${rgb},${inputAlpha});`,
+    `--color-input-focused:rgba(${rgb},${Math.min(1, inputAlpha + 0.2)});`,
+    opts.dim > 0 ? `--zcode-beautify-dim:${opts.dim / 100};` : ""
+  ].filter(Boolean);
+}
 function rootBlock(theme, opts) {
   return `:root,:host{${tokenRows(theme, "light", opts).join("")}}`;
 }
@@ -144502,17 +144530,22 @@ html, body { background: transparent !important; }
   background: rgb(0 0 0 / var(--zcode-beautify-dim, ${config2.dim / 100}));
 }`);
   }
-  if (assets && config2.monet) {
-    parts.push(buildVariableOverrides(assets.theme, {
-      dim: config2.dim,
-      wallpaperVisible: config2.wallpaperVisible
-    }));
+  if (assets) {
+    if (config2.monet) {
+      parts.push(buildVariableOverrides(assets.theme, {
+        dim: config2.dim,
+        wallpaperVisible: config2.wallpaperVisible
+      }));
+    } else if (config2.wallpaperVisible) {
+      parts.push(buildTransparencyOverrides({ dim: config2.dim }));
+    }
   }
+  const wallpaperDataUri = config2.wallpaperVisible ? assets?.dataUri : void 0;
   return {
     css: parts.join("\n"),
-    wallpaperDataUri: assets?.dataUri,
+    wallpaperDataUri,
     assets,
-    fit: resolved,
+    fit: config2.wallpaperVisible ? resolved : "cover",
     focusX,
     focusY
   };

@@ -5,7 +5,7 @@
 
 import { CdpConnection, injectIntoTarget, listTargets, pickRendererTargets, buildResetScript } from "./cdp.js";
 import { loadWallpaper, type WallpaperAssets } from "./monet.js";
-import { buildVariableOverrides } from "./tokens.js";
+import { buildVariableOverrides, buildTransparencyOverrides } from "./tokens.js";
 
 export type WallpaperFit = "cover" | "contain" | "smart";
 
@@ -85,18 +85,26 @@ html, body { background: transparent !important; }
 }`);
   }
 
-  if (assets && config.monet) {
-    parts.push(buildVariableOverrides(assets.theme, {
-      dim: config.dim,
-      wallpaperVisible: config.wallpaperVisible,
-    }));
+  if (assets) {
+    // Monet recolors the UI from the wallpaper; the wallpaper toggle only
+    // decides whether the picture is visible at all. With Monet off we still
+    // need transparency, otherwise the opaque UI hides the wallpaper.
+    if (config.monet) {
+      parts.push(buildVariableOverrides(assets.theme, {
+        dim: config.dim,
+        wallpaperVisible: config.wallpaperVisible,
+      }));
+    } else if (config.wallpaperVisible) {
+      parts.push(buildTransparencyOverrides({ dim: config.dim }));
+    }
   }
+  const wallpaperDataUri = config.wallpaperVisible ? assets?.dataUri : undefined;
 
   return {
     css: parts.join("\n"),
-    wallpaperDataUri: assets?.dataUri,
+    wallpaperDataUri,
     assets,
-    fit: resolved,
+    fit: config.wallpaperVisible ? resolved : "cover",
     focusX,
     focusY,
   };

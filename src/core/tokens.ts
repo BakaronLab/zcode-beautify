@@ -26,6 +26,42 @@ export function buildVariableOverrides(theme: Theme, opts: ThemeOptions): string
   return `${rootBlock(theme, opts)}\n.dark{${tokenRows(theme, "dark", opts).join("")}}`;
 }
 
+/**
+ * Transparency-only overrides for `monet: false`: make the wallpaper show
+ * through with neutral scrims while keeping ZCode's own colors untouched.
+ * Only background/surface/input tokens are set; foregrounds, accents and
+ * borders stay native.
+ */
+export function buildTransparencyOverrides(opts: { dim: number }): string {
+  return `:root,:host{${transparencyRows("light", opts).join("")}}\n.dark{${transparencyRows("dark", opts).join("")}}`;
+}
+
+const LIGHT_SCRIM = "255,255,255";
+const DARK_SCRIM = "18,18,22";
+
+function transparencyRows(mode: "light" | "dark", opts: { dim: number }): string[] {
+  const rgb = mode === "light" ? LIGHT_SCRIM : DARK_SCRIM;
+  const baseAlpha = 0.72;
+  const panelAlpha = 0.62;
+  const inputAlpha = 0.5;
+  const popoverAlpha = 0.92;
+  return [
+    `--color-background:transparent;`,
+    `--color-background-alt:rgba(${rgb},${panelAlpha});`,
+    `--color-background-win-alt:rgba(${rgb},${panelAlpha});`,
+    `--color-panel:rgba(${rgb},${panelAlpha});`,
+    `--color-sidebar:rgba(${rgb},${panelAlpha});`,
+    `--color-surface:rgba(${rgb},${baseAlpha});`,
+    `--color-surface-hover:rgba(${rgb},${baseAlpha});`,
+    `--color-card:rgba(${rgb},${baseAlpha});`,
+    `--color-card-selected:rgba(${rgb},${Math.min(1, baseAlpha + 0.15)});`,
+    `--color-popover:rgba(${rgb},${popoverAlpha});`,
+    `--color-input:rgba(${rgb},${inputAlpha});`,
+    `--color-input-focused:rgba(${rgb},${Math.min(1, inputAlpha + 0.2)});`,
+    opts.dim > 0 ? `--zcode-beautify-dim:${opts.dim / 100};` : "",
+  ].filter(Boolean);
+}
+
 function rootBlock(theme: Theme, opts: ThemeOptions): string {
   return `:root,:host{${tokenRows(theme, "light", opts).join("")}}`;
 }
