@@ -144676,7 +144676,7 @@ function mergedConfig() {
 // dist/mcp/server.js
 var server = new McpServer({
   name: "zcode-beautify",
-  version: "0.2.0"
+  version: "0.2.1"
 });
 server.registerTool("set_background", {
   title: "Set ZCode wallpaper",
