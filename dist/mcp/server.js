@@ -144966,7 +144966,7 @@ async function repairLaunchers(opts) {
 // dist/mcp/server.js
 var server = new McpServer({
   name: "zcode-beautify",
-  version: "0.2.1"
+  version: "0.3.0"
 });
 server.registerTool("set_background", {
   title: "Set ZCode wallpaper",

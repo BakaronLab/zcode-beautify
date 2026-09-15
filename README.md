@@ -12,7 +12,7 @@ Beautify the **ZCode desktop client**: use any image as a background wallpaper a
 - **Monet theming** — a source color is extracted from the wallpaper with Google's official MD3 algorithm; light/dark palettes are mapped onto ZCode's semantic CSS variables (35+ tokens).
 - **Live settings panel** — a draggable panel inside ZCode with blur/dim sliders, Monet and wallpaper-visibility toggles, one-click wallpaper swap, and reset. Changes preview instantly and persist.
 - **Conversation control** — bundled slash command `/beautify` and MCP tools let the ZCode agent set the wallpaper or tune the theme on your behalf.
-- **Self-healing** — while `serve` runs, the theme survives renderer reloads automatically; the last look is also cached in `localStorage` as a fallback.
+- **Survives restarts** — the injected theme dies with the renderer on every ZCode restart, so the plugin puts it back: `on-start` (default) has the MCP host restore it when ZCode starts, `always` keeps a background service alive so the theme *and* the settings panel survive a reboot. Choose either in the settings panel.
 
 ## How it works
 
@@ -82,7 +82,16 @@ node dist/cli.js launch
 # 2) Set a wallpaper with Monet adaptation
 node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
 
-# 3) (Recommended) Keep the theme alive + get the live settings panel.
+# 3) Persist the debug port into every launch entry, so starting ZCode normally
+#    still opens it. Entries needing admin rights are reported and skipped.
+node dist/cli.js repair-launchers
+
+# 4) Choose what restores the theme after a restart.
+#    on-start (default) = no resident process, no settings panel.
+#    always             = background service; theme + panel survive a reboot.
+node dist/cli.js recovery on-start
+
+# 5) Only needed for `on-start`: get the live settings panel now.
 #    --detach backgrounds it, so the panel keeps working after this shell
 #    (or the agent session that started it) is gone.
 node dist/cli.js serve --detach
@@ -101,6 +110,9 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 | `colors` | Re-apply the stored theme without changing the image |
 | `serve [--detach] [--api-port M]` | Watch mode + settings panel + local control API (default API port 9223); `--detach` survives the shell that started it |
 | `watch` | Headless watch mode: re-inject whenever ZCode restarts |
+| `recovery [off\|on-start\|always]` | How the theme comes back after a restart (default `on-start`) |
+| `autostart [install\|uninstall]` | Register the resident service to start at sign-in (used by `always`) |
+| `repair-launchers [--dry-run]` | Add `--remote-debugging-port` to every launch entry missing it |
 | `reset` | Remove wallpaper and color overrides |
 | `status` | Show CDP reachability and renderer targets |
 
@@ -113,6 +125,9 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 | `refresh_theme` | Re-inject the stored theme after a restart |
 | `reset_appearance` | Remove wallpaper and overrides |
 | `beautify_status` | Show the stored config |
+| `recovery_status` | Report the recovery mode, autostart entry and CDP reachability |
+| `set_recovery_mode` | Switch between `off` / `on-start` / `always` |
+| `repair_launchers` | Add the debug-port flag to launch entries missing it |
 
 ## Project structure
 
@@ -122,8 +137,11 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 │  ├─ core/
 │  │  ├─ cdp.ts              # Minimal Chrome DevTools Protocol client + injection scripts
 │  │  ├─ inject.ts           # Assembles the injected payload (wallpaper CSS + token overrides)
+│  │  ├─ autostart.ts        # Per-user autostart registration (VBS / LaunchAgent / XDG)
+│  │  ├─ launchers.ts        # Finds launch entries missing the debug-port flag and adds it
 │  │  ├─ launch.ts           # Config persistence + ZCode launcher (single-instance aware)
 │  │  ├─ monet.ts            # Image decode, MD3 source-color extraction, smart-fit analysis
+│  │  ├─ recovery.ts         # off / on-start / always — what restores the theme after a restart
 │  │  ├─ server.ts           # `serve` mode: localhost control API + persistent injection sessions
 │  │  ├─ session.ts          # Shared apply/reset operations used by CLI and MCP
 │  │  └─ tokens.ts           # MD3 schemes → ZCode's Tailwind v4 --color-* variables
@@ -165,9 +183,10 @@ zip, or read [`skill-pack/SKILL.md`](skill-pack/SKILL.md) directly.
 ## Risks & limitations
 
 - Injection happens over CDP — an **unofficial** mechanism. Updates to ZCode may break it; `reset` always restores the default look.
-- `launch` restarts ZCode once. Without `serve`/`watch` running, the theme is lost on every ZCode restart (CDP sessions are scoped to the connection). To make it permanent, add ` --remote-debugging-port=9222` to your ZCode shortcut's target — the theme then survives every restart as long as `serve` runs. Start it with `serve --detach`: a foreground `serve` dies with the terminal (or agent session) that spawned it, and the panel then reports itself offline.
+- ZCode only opens its debug port when it is started with `--remote-debugging-port`, and an instance that is already running can never grow one — the flag has to come from the launcher. `repair-launchers` writes it into every launch entry it can reach; machine-wide entries need administrator rights and are reported instead.
+- The injected theme lives in the renderer and is lost on every ZCode restart. `on-start` (default) restores it once when ZCode starts; `always` keeps the resident `serve` daemon alive so the theme and the settings panel both survive. A foreground `serve` dies with the terminal (or agent session) that spawned it — use `serve --detach`, or let `always` manage it.
 - Functional colors (success/warning/destructive) are intentionally left untouched.
-- The control API binds to `127.0.0.1` only and accepts requests from any local process by design (the injected panel needs CORS).
+- The control API binds to `127.0.0.1` and requires a token that only the injected panel carries, so a stray local process — or a web page open in a local browser — cannot drive it.
 
 ## License
 

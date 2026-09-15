@@ -23,26 +23,31 @@ modifies ZCode's installation files.
    source color, generates light/dark schemes, and injects everything into the
    running ZCode renderer.
 3. **On CDP/port errors**: the ZCode instance is running without the debug
-   port. Instruct the user to quit ZCode completely and start it via
-   `node <plugin-root>/dist/cli.js launch`, or via watch mode:
-   `node <plugin-root>/dist/cli.js watch` (keeps re-injecting across restarts).
+   port. Run `repair_launchers` first — it appends `--remote-debugging-port` to
+   every launch entry missing it, so a normal start opens the port from then on.
+   Then have the user quit ZCode completely and start it again; the flag cannot
+   be added to an instance that is already running.
 4. **Fine-tune with `apply_options`** (blur / dim / monet / wallpaper_visible /
    fit) when the user wants adjustments — it does not need the image path
    again. `fit` picks the framing: `cover` fills and crops, `contain`
    letterboxes over a blurred backdrop, `smart` analyzes the picture locally
    and picks framing + focus automatically.
-5. **After ZCode restarts**, the injected theme is gone until re-injected — use
-   the `refresh_theme` tool or run watch mode.
+5. **After ZCode restarts**, the injected theme is gone — the renderer that held
+   it no longer exists. `recovery_status` reports which mechanism is in charge:
+   `on-start` (default) restores it automatically once ZCode is up, `always`
+   keeps a resident service doing it, `off` leaves it to the user. Change it with
+   `set_recovery_mode`. Either way `refresh_theme` forces a re-injection now.
 6. **To undo everything**, use `reset_appearance`.
-7. **Recommend `node <plugin-root>/dist/cli.js serve --detach`** for an
-   interactive experience: it keeps the theme alive and shows a draggable
-   settings panel inside ZCode (blur/dim sliders, Monet toggle, wallpaper swap,
-   reset). `--detach` matters — a foreground `serve` is reaped with the shell or
-   agent session that spawned it, and the panel then shows its ⚠ offline banner.
-   Never start a second `serve`: it refuses to start and names the pid holding
-   the port. If the panel reports itself offline, run `serve --detach` rather
-   than assuming the stored config is empty — an offline panel deliberately
-   zeroes its controls.
+7. **Recommend the settings panel** for an interactive experience: a draggable
+   panel inside ZCode with blur/dim sliders, Monet toggle, wallpaper swap and
+   reset. It needs the resident service, so either set the recovery mode to
+   `always` (which starts it and registers the autostart entry) or run
+   `node <plugin-root>/dist/cli.js serve --detach` once. `--detach` matters — a
+   foreground `serve` is reaped with the shell or agent session that spawned it,
+   and the panel then shows its ⚠ offline banner. Never start a second `serve`:
+   it refuses to start and names the pid holding the port. If the panel reports
+   itself offline, run `serve --detach` rather than assuming the stored config
+   is empty — an offline panel deliberately zeroes its controls.
 
 ## Tools
 
@@ -53,10 +58,15 @@ modifies ZCode's installation files.
 | `refresh_theme` | Re-inject stored theme after a restart |
 | `reset_appearance` | Remove wallpaper and overrides |
 | `beautify_status` | Show stored config |
+| `recovery_status` | Report the recovery mode, autostart entry and CDP reachability |
+| `set_recovery_mode` | Switch between `off` / `on-start` / `always` |
+| `repair_launchers` | Add the debug-port flag to launch entries missing it |
 
 ## Constraints
 
-- ZCode must be running (or startable) with `--remote-debugging-port=9222`.
-- Themes live in CDP sessions: they are wiped when ZCode restarts. Watch mode
-  makes re-injection automatic.
+- ZCode must be running (or startable) with `--remote-debugging-port=9222`. The
+  flag can only come from the launcher — `repair_launchers` writes it into the
+  shortcuts and protocol handlers, and machine-wide entries need admin rights.
+- The injected theme lives in the renderer and is wiped when ZCode restarts. The
+  recovery mode decides who puts it back; `refresh_theme` forces it.
 - Functional colors (success/warning/destructive) are intentionally preserved.

@@ -12,7 +12,7 @@
 - **莫奈配色**——用 Google 官方 MD3 算法从壁纸提取 source color,生成 light/dark 双套调色板,映射覆盖 ZCode 的 35+ 个语义 CSS 变量。
 - **实时设置面板**——ZCode 窗口内可拖拽的悬浮面板:blur/dim 滑块、Monet 开关、壁纸透显开关、一键换图、还原;所有调整即时预览并自动保存。
 - **对话控制**——内置 `/beautify` 斜杠命令与 MCP 工具,让 ZCode 智能体代你设壁纸、调主题。
-- **自愈**——`serve` 运行期间主题在渲染器刷新后自动恢复;上次外观还会缓存到 `localStorage` 作为兜底。
+- **重启后自动恢复**——注入的主题随渲染器一起消失,所以由插件负责把它放回来:`on-start`(默认)由 ZCode 启动时拉起的 MCP 宿主恢复一次;`always` 常驻一个后台服务,主题与设置面板都能扛过重启。可在设置面板里切换。
 
 ## 原理
 
@@ -79,7 +79,16 @@ node dist/cli.js launch
 # 2) 设置壁纸并自动适配配色
 node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
 
-# 3) (推荐)守护模式 + 实时设置面板
+# 3) 给所有启动入口补上调试端口,这样正常启动 ZCode 也能开出端口
+#    需要管理员权限的入口会被报告并跳过
+node dist/cli.js repair-launchers
+
+# 4) 选择重启后由谁恢复主题
+#    on-start(默认)= 不占内存,但没有设置面板
+#    always        = 后台常驻,主题与面板都扛过重启
+node dist/cli.js recovery on-start
+
+# 5) 仅 on-start 模式需要:现在起一个服务拿到实时设置面板
 #    --detach 让服务转入后台,启动它的终端(或智能体会话)结束后面板依然可用
 node dist/cli.js serve --detach
 ```
@@ -97,6 +106,9 @@ node dist/cli.js serve --detach
 | `colors` | 不换图,重新应用已存主题 |
 | `serve [--detach] [--api-port M]` | 守护模式 + 设置面板 + 本地控制 API(默认 API 端口 9223);`--detach` 使其脱离启动它的终端存活 |
 | `watch` | 无面板守护模式:ZCode 重启后自动重注入 |
+| `recovery [off\|on-start\|always]` | 重启后由谁恢复主题(默认 `on-start`) |
+| `autostart [install\|uninstall]` | 注册登录时自启的常驻服务(`always` 模式使用) |
+| `repair-launchers [--dry-run]` | 给所有缺调试端口的启动入口补上参数 |
 | `reset` | 移除壁纸与配色覆盖 |
 | `status` | 查看 CDP 可达性与渲染器目标 |
 
@@ -109,6 +121,9 @@ node dist/cli.js serve --detach
 | `refresh_theme` | 重启后重注入已存主题 |
 | `reset_appearance` | 移除壁纸与覆盖,还原默认 |
 | `beautify_status` | 查看已存配置 |
+| `recovery_status` | 查看恢复模式、自启项状态与 CDP 可达性 |
+| `set_recovery_mode` | 在 `off` / `on-start` / `always` 间切换 |
+| `repair_launchers` | 给缺调试端口的启动入口补参数 |
 
 ## 项目结构
 
@@ -118,8 +133,11 @@ node dist/cli.js serve --detach
 │  ├─ core/
 │  │  ├─ cdp.ts              # 精简 Chrome DevTools Protocol 客户端 + 注入脚本
 │  │  ├─ inject.ts           # 装配注入载荷(壁纸层 CSS + token 覆盖)
+│  │  ├─ autostart.ts        # 用户级开机自启注册(VBS / LaunchAgent / XDG)
+│  │  ├─ launchers.ts        # 找出缺调试端口的启动入口并补上
 │  │  ├─ launch.ts           # 配置持久化 + ZCode 启动器(感知单实例锁)
 │  │  ├─ monet.ts            # 图片解码、MD3 取色、智能适配(smart fit)分析
+│  │  ├─ recovery.ts         # off / on-start / always —— 重启后由谁恢复主题
 │  │  ├─ server.ts           # serve 模式:本地控制 API + 持久注入会话
 │  │  ├─ session.ts          # CLI 与 MCP 共用的应用/还原操作
 │  │  └─ tokens.ts           # MD3 调色板 → ZCode 的 Tailwind v4 --color-* 变量映射
@@ -152,9 +170,10 @@ npm run bundle   # 预构建单文件产物(仓库随附)
 ## 风险与限制
 
 - 注入通过 CDP(Chrome DevTools 协议)实现,属**非官方**手段,ZCode 更新可能使其失效;`reset` 可随时还原默认外观。
-- `launch` 需要重启一次 ZCode。若 `serve`/`watch` 未运行,每次 ZCode 重启主题都会丢失(CDP 会话随连接关闭)。一劳永逸:在 ZCode 快捷方式的目标末尾追加 ` --remote-debugging-port=9222`,之后只要 `serve` 在运行,重启也会自动恢复。请用 `serve --detach` 启动:前台 `serve` 会随启动它的终端(或智能体会话)一起退出,面板随即显示离线。
+- ZCode 只在以 `--remote-debugging-port` 启动时才开调试端口,而已经运行的实例无法中途补上——参数只能由启动它的入口提供。`repair-launchers` 会把它写进所有能写的启动入口;机器级入口需要管理员权限,会被报告而不是静默跳过。
+- 注入的主题活在渲染器里,每次 ZCode 重启都会丢失。`on-start`(默认)在 ZCode 启动时恢复一次;`always` 常驻 `serve` 服务,主题与设置面板都能扛过重启。前台 `serve` 会随启动它的终端(或智能体会话)一起退出——请用 `serve --detach`,或交给 `always` 管理。
 - 功能色(success/warning/destructive)刻意保持不动。
-- 控制 API 仅绑定 `127.0.0.1`,但按设计接受本机任意进程访问(注入面板需要 CORS)。
+- 控制 API 绑定 `127.0.0.1`,并要求一个只有注入面板才持有的令牌;本机其它进程、或浏览器里的网页都无法驱动它。
 
 ## 许可证
 
