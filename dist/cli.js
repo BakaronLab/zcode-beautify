@@ -6027,7 +6027,7 @@ var require_gifframe = __commonJS({
 var require_gifutil = __commonJS({
   "node_modules/gifwrap/src/gifutil.js"(exports) {
     "use strict";
-    var fs7 = __require("fs");
+    var fs9 = __require("fs");
     var ImageQ = require_image_q();
     var BitmapImage2 = require_bitmapimage();
     var { GifFrame: GifFrame2 } = require_gifframe();
@@ -6142,14 +6142,14 @@ var require_gifutil = __commonJS({
       jimpImage.bitmap.data = bitmapImageToShare.bitmap.data;
       return jimpImage;
     };
-    exports.write = function(path5, frames, spec, encoder) {
+    exports.write = function(path7, frames, spec, encoder) {
       encoder = encoder || defaultCodec;
-      const matches = path5.match(/\.[a-zA-Z]+$/);
+      const matches = path7.match(/\.[a-zA-Z]+$/);
       if (matches !== null && INVALID_SUFFIXES.includes(matches[0].toLowerCase())) {
-        throw new Error(`GIF '${path5}' has an unexpected suffix`);
+        throw new Error(`GIF '${path7}' has an unexpected suffix`);
       }
       return encoder.encodeGif(frames, spec).then((gif2) => {
-        return _writeBinary(path5, gif2.buffer).then(() => {
+        return _writeBinary(path7, gif2.buffer).then(() => {
           return gif2;
         });
       });
@@ -6221,9 +6221,9 @@ var require_gifutil = __commonJS({
         }
       }
     }
-    function _readBinary(path5) {
+    function _readBinary(path7) {
       return new Promise((resolve, reject) => {
-        fs7.readFile(path5, (err, buffer) => {
+        fs9.readFile(path7, (err, buffer) => {
           if (err) {
             return reject(err);
           }
@@ -6231,9 +6231,9 @@ var require_gifutil = __commonJS({
         });
       });
     }
-    function _writeBinary(path5, buffer) {
+    function _writeBinary(path7, buffer) {
       return new Promise((resolve, reject) => {
-        fs7.writeFile(path5, buffer, (err) => {
+        fs9.writeFile(path7, buffer, (err) => {
           if (err) {
             return reject(err);
           }
@@ -8244,9 +8244,9 @@ var require_decoder = __commonJS({
         return a2 < 0 ? 0 : a2 > 255 ? 255 : a2;
       }
       constructor.prototype = {
-        load: function load(path5) {
+        load: function load(path7) {
           var xhr = new XMLHttpRequest();
-          xhr.open("GET", path5, true);
+          xhr.open("GET", path7, true);
           xhr.responseType = "arraybuffer";
           xhr.onload = (function() {
             var data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
@@ -19149,8 +19149,8 @@ var init_parseUtil = __esm({
     init_errors();
     init_en();
     makeIssue = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -19458,11 +19458,11 @@ var init_types2 = __esm({
     init_parseUtil();
     init_util();
     ParseInputLazyPath = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -23275,8 +23275,8 @@ var init_parseUtil2 = __esm({
     init_errors2();
     init_en2();
     makeIssue2 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -23584,11 +23584,11 @@ var init_types3 = __esm({
     init_parseUtil2();
     init_util2();
     ParseInputLazyPath2 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -28186,8 +28186,8 @@ var init_parseUtil3 = __esm({
     init_errors3();
     init_en3();
     makeIssue3 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -28495,11 +28495,11 @@ var init_types4 = __esm({
     init_parseUtil3();
     init_util3();
     ParseInputLazyPath3 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -32340,8 +32340,8 @@ var init_parseUtil4 = __esm({
     init_errors4();
     init_en4();
     makeIssue4 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -32649,11 +32649,11 @@ var init_types5 = __esm({
     init_parseUtil4();
     init_util4();
     ParseInputLazyPath4 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -36776,11 +36776,11 @@ var require_Mime = __commonJS({
         }
       }
     };
-    Mime.prototype.getType = function(path5) {
-      path5 = String(path5);
-      let last = path5.replace(/^.*[/\\]/, "").toLowerCase();
+    Mime.prototype.getType = function(path7) {
+      path7 = String(path7);
+      let last = path7.replace(/^.*[/\\]/, "").toLowerCase();
       let ext = last.replace(/^.*\./, "").toLowerCase();
-      let hasPath = last.length < path5.length;
+      let hasPath = last.length < path7.length;
       let hasDot = ext.length < last.length - 1;
       return (hasDot || !hasPath) && this._types[ext] || null;
     };
@@ -43318,8 +43318,8 @@ function isTokenizerStreamBoundsError(error) {
   }
   return /strtok3[/\\]lib[/\\]stream[/\\]/.test(error.stack);
 }
-async function fileTypeFromFile(path5, options) {
-  return new FileTypeParser2(options).fromFile(path5, options);
+async function fileTypeFromFile(path7, options) {
+  return new FileTypeParser2(options).fromFile(path7, options);
 }
 async function fileTypeFromStream(stream, options) {
   return new FileTypeParser2(options).fromStream(stream);
@@ -43350,9 +43350,9 @@ var init_file_type = __esm({
           }
         }
       }
-      async fromFile(path5) {
+      async fromFile(path7) {
         this.options.signal?.throwIfAborted();
-        const fileHandle = await fs2.open(path5, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
+        const fileHandle = await fs2.open(path7, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
         const fileStat = await fileHandle.stat();
         if (!fileStat.isFile()) {
           await fileHandle.close();
@@ -43361,7 +43361,7 @@ var init_file_type = __esm({
         const tokenizer = new FileTokenizer(fileHandle, {
           ...this.getTokenizerOptions(),
           fileInfo: {
-            path: path5,
+            path: path7,
             size: fileStat.size
           }
         });
@@ -43696,9 +43696,9 @@ function createJimp({ plugins: pluginsArg, formats: formatsArg } = {}) {
      * await image.write("test/output.png");
      * ```
      */
-    async write(path5, options) {
-      const mimeType = import_lite.default.getType(path5);
-      await writeFile(path5, await this.getBuffer(mimeType, options));
+    async write(path7, options) {
+      const mimeType = import_lite.default.getType(path7);
+      await writeFile(path7, await this.getBuffer(mimeType, options));
     }
     /**
      * Clone the image into a new Jimp instance.
@@ -44347,8 +44347,8 @@ var init_parseUtil5 = __esm({
     init_errors5();
     init_en5();
     makeIssue5 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -44656,11 +44656,11 @@ var init_types6 = __esm({
     init_parseUtil5();
     init_util6();
     ParseInputLazyPath5 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -49105,8 +49105,8 @@ var init_parseUtil6 = __esm({
     init_errors6();
     init_en6();
     makeIssue6 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -49414,11 +49414,11 @@ var init_types7 = __esm({
     init_parseUtil6();
     init_util7();
     ParseInputLazyPath6 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -53272,8 +53272,8 @@ var init_parseUtil7 = __esm({
     init_errors7();
     init_en7();
     makeIssue7 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -53581,11 +53581,11 @@ var init_types8 = __esm({
     init_parseUtil7();
     init_util8();
     ParseInputLazyPath7 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -57566,8 +57566,8 @@ var init_parseUtil8 = __esm({
     init_errors8();
     init_en8();
     makeIssue8 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -57875,11 +57875,11 @@ var init_types9 = __esm({
     init_parseUtil8();
     init_util9();
     ParseInputLazyPath8 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -61728,8 +61728,8 @@ var init_parseUtil9 = __esm({
     init_errors9();
     init_en9();
     makeIssue9 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -62037,11 +62037,11 @@ var init_types10 = __esm({
     init_parseUtil9();
     init_util10();
     ParseInputLazyPath9 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -65927,8 +65927,8 @@ var init_parseUtil10 = __esm({
     init_errors10();
     init_en10();
     makeIssue10 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -66236,11 +66236,11 @@ var init_types11 = __esm({
     init_parseUtil10();
     init_util11();
     ParseInputLazyPath10 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -70078,8 +70078,8 @@ var init_parseUtil11 = __esm({
     init_errors11();
     init_en11();
     makeIssue11 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -70387,11 +70387,11 @@ var init_types12 = __esm({
     init_parseUtil11();
     init_util12();
     ParseInputLazyPath11 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -74464,8 +74464,8 @@ var init_parseUtil12 = __esm({
     init_errors12();
     init_en12();
     makeIssue12 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -74773,11 +74773,11 @@ var init_types13 = __esm({
     init_parseUtil12();
     init_util13();
     ParseInputLazyPath12 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -78634,8 +78634,8 @@ var init_parseUtil13 = __esm({
     init_errors13();
     init_en13();
     makeIssue13 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -78943,11 +78943,11 @@ var init_types14 = __esm({
     init_parseUtil13();
     init_util14();
     ParseInputLazyPath13 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -82961,8 +82961,8 @@ var init_parseUtil14 = __esm({
     init_errors14();
     init_en14();
     makeIssue14 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -83270,11 +83270,11 @@ var init_types16 = __esm({
     init_parseUtil14();
     init_util15();
     ParseInputLazyPath14 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -87238,8 +87238,8 @@ var init_parseUtil15 = __esm({
     init_errors15();
     init_en15();
     makeIssue15 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -87547,11 +87547,11 @@ var init_types17 = __esm({
     init_parseUtil15();
     init_util16();
     ParseInputLazyPath15 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -94288,8 +94288,8 @@ var init_parseUtil16 = __esm({
     init_errors16();
     init_en16();
     makeIssue16 = (params) => {
-      const { data, path: path5, errorMaps, issueData } = params;
-      const fullPath = [...path5, ...issueData.path || []];
+      const { data, path: path7, errorMaps, issueData } = params;
+      const fullPath = [...path7, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -94597,11 +94597,11 @@ var init_types18 = __esm({
     init_parseUtil16();
     init_util17();
     ParseInputLazyPath16 = class {
-      constructor(parent, value, path5, key) {
+      constructor(parent, value, path7, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path5;
+        this._path = path7;
         this._key = key;
       }
       get path() {
@@ -109875,6 +109875,7 @@ __export(launch_exports, {
   isZcodeProcessRunning: () => isZcodeProcessRunning,
   launchZcode: () => launchZcode,
   loadConfig: () => loadConfig,
+  relaunchZcode: () => relaunchZcode,
   saveConfig: () => saveConfig
 });
 import { execFile, spawn } from "node:child_process";
@@ -109966,6 +109967,26 @@ async function launchZcode(port) {
     throw new Error("CDP came up but closed again immediately \u2014 a running ZCode instance took over via the single-instance lock. Quit ZCode completely and run `zcode-beautify launch` again.");
   }
   return { started: true };
+}
+async function killZcode() {
+  try {
+    if (process.platform === "win32") {
+      await execFileAsync("taskkill", ["/F", "/IM", "ZCode.exe"]);
+    } else {
+      await execFileAsync("pkill", ["-x", process.platform === "darwin" ? "ZCode" : "zcode"]);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+async function relaunchZcode(port) {
+  const killed = await killZcode();
+  for (let i2 = 0; i2 < 20 && await isZcodeProcessRunning(); i2++) {
+    await new Promise((r2) => setTimeout(r2, 500));
+  }
+  const result = await launchZcode(port);
+  return { killed, started: result.started || result.reason === "already-running-with-cdp" };
 }
 var ZCODE_EXE_CANDIDATES, execFileAsync;
 var init_launch = __esm({
@@ -110060,11 +110081,183 @@ var init_session = __esm({
   }
 });
 
+// dist/core/autostart.js
+import fs5 from "node:fs";
+import os2 from "node:os";
+import path3 from "node:path";
+function startupDir() {
+  const appData = process.env.APPDATA ?? path3.join(os2.homedir(), "AppData", "Roaming");
+  return path3.join(appData, "Microsoft", "Windows", "Start Menu", "Programs", "Startup");
+}
+function launchAgentPath() {
+  return path3.join(os2.homedir(), "Library", "LaunchAgents", `${AUTOSTART_LABEL}.plist`);
+}
+function xdgAutostartPath() {
+  const configHome = process.env.XDG_CONFIG_HOME ?? path3.join(os2.homedir(), ".config");
+  return path3.join(configHome, "autostart", `${AUTOSTART_ID}.desktop`);
+}
+function autostartEntryPath() {
+  if (process.platform === "win32")
+    return path3.join(startupDir(), `${AUTOSTART_ID}.vbs`);
+  if (process.platform === "darwin")
+    return launchAgentPath();
+  if (process.platform === "linux")
+    return xdgAutostartPath();
+  return void 0;
+}
+function cliEntryPath() {
+  const entry = process.argv[1];
+  try {
+    return fs5.realpathSync(entry);
+  } catch {
+    return path3.resolve(entry ?? "");
+  }
+}
+function quoteVbs(value) {
+  return `""${value.replace(/"/g, '""')}""`;
+}
+function windowsScript(spec) {
+  const command = [
+    quoteVbs(spec.nodePath),
+    quoteVbs(spec.cliPath),
+    "serve",
+    "--port",
+    String(spec.cdpPort),
+    "--api-port",
+    String(spec.apiPort),
+    "--detach"
+  ].join(" ");
+  return [
+    `' ZCode Beautify \u2014 restores the wallpaper and Monet colors after ZCode restarts.`,
+    `' Runs \`serve --detach\` in the background, with no visible window.`,
+    `' Delete this file (or run \`zcode-beautify autostart uninstall\`) to disable it.`,
+    `CreateObject("WScript.Shell").Run ${command}, 0, False`,
+    ``
+  ].join("\r\n");
+}
+function macosScript(spec) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>${AUTOSTART_LABEL}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>${spec.nodePath}</string>
+    <string>${spec.cliPath}</string>
+    <string>serve</string>
+    <string>--port</string>
+    <string>${spec.cdpPort}</string>
+    <string>--api-port</string>
+    <string>${spec.apiPort}</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>
+`;
+}
+function linuxScript(spec) {
+  const exec = [spec.nodePath, spec.cliPath, "serve", "--port", String(spec.cdpPort), "--api-port", String(spec.apiPort)].map((part) => /[\s"]/.test(part) ? `"${part.replace(/"/g, '\\"')}"` : part).join(" ");
+  return `[Desktop Entry]
+Type=Application
+Name=ZCode Beautify
+Comment=Keeps the ZCode wallpaper and Monet colors applied across restarts
+Exec=${exec}
+Terminal=false
+X-GNOME-Autostart-enabled=true
+`;
+}
+function getAutostartStatus() {
+  const platform = process.platform;
+  const entryPath = autostartEntryPath();
+  if (!entryPath) {
+    return { platform, supported: false, installed: false, note: `autostart is not implemented for ${platform}` };
+  }
+  return { platform, supported: true, installed: fs5.existsSync(entryPath), entryPath };
+}
+function installAutostart(spec) {
+  const entryPath = autostartEntryPath();
+  if (!entryPath)
+    return getAutostartStatus();
+  const script = process.platform === "win32" ? windowsScript(spec) : process.platform === "darwin" ? macosScript(spec) : linuxScript(spec);
+  fs5.mkdirSync(path3.dirname(entryPath), { recursive: true });
+  fs5.writeFileSync(entryPath, script);
+  return getAutostartStatus();
+}
+function uninstallAutostart() {
+  const entryPath = autostartEntryPath();
+  if (!entryPath)
+    return getAutostartStatus();
+  fs5.rmSync(entryPath, { force: true });
+  return getAutostartStatus();
+}
+var AUTOSTART_ID, AUTOSTART_LABEL;
+var init_autostart = __esm({
+  "dist/core/autostart.js"() {
+    "use strict";
+    AUTOSTART_ID = "zcode-beautify";
+    AUTOSTART_LABEL = "com.logocceai.zcode-beautify";
+  }
+});
+
+// dist/core/recovery.js
+import fs6 from "node:fs";
+import path4 from "node:path";
+function normalizeMode(value) {
+  return typeof value === "string" && RECOVERY_MODES.includes(value) ? value : void 0;
+}
+function recoveryFile() {
+  return path4.join(dataDir(), "recovery.json");
+}
+function loadRecovery() {
+  try {
+    const raw = JSON.parse(fs6.readFileSync(recoveryFile(), "utf8"));
+    return { mode: normalizeMode(raw.mode) ?? DEFAULT_RECOVERY_MODE, updatedAt: raw.updatedAt };
+  } catch {
+    return { mode: DEFAULT_RECOVERY_MODE };
+  }
+}
+function saveRecovery(config) {
+  fs6.mkdirSync(dataDir(), { recursive: true });
+  fs6.writeFileSync(recoveryFile(), JSON.stringify(config, null, 2));
+}
+function setRecoveryMode(mode) {
+  const next = { mode, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+  saveRecovery(next);
+  return next;
+}
+function recoveryStatus() {
+  return { ...loadRecovery(), autostart: getAutostartStatus() };
+}
+function applyRecoveryMode(mode, spec) {
+  setRecoveryMode(mode);
+  if (mode === "always")
+    installAutostart(spec);
+  else
+    uninstallAutostart();
+  return recoveryStatus();
+}
+var RECOVERY_MODES, DEFAULT_RECOVERY_MODE;
+var init_recovery = __esm({
+  "dist/core/recovery.js"() {
+    "use strict";
+    init_launch();
+    init_autostart();
+    RECOVERY_MODES = ["off", "on-start", "always"];
+    DEFAULT_RECOVERY_MODE = "on-start";
+  }
+});
+
 // dist/panel/panelScript.js
-function buildPanelScript(apiPort) {
+function buildPanelScript(apiPort, token) {
   const api = `http://127.0.0.1:${apiPort}`;
   return `(function(){
   var API = ${JSON.stringify(api)};
+  var TOKEN = ${JSON.stringify(token)};
   var ROOT_ID = ${JSON.stringify(PANEL_ROOT_ID)};
   // Always rebuild: an older panel left in the DOM would otherwise shadow the
   // current script version forever (the old build skipped installation).
@@ -110110,7 +110303,14 @@ function buildPanelScript(apiPort) {
     // as a real (wrong) setting.
     '#zcode-beautify-panel-root[data-offline="1"] #zb-body { opacity: .45; pointer-events: none; }',
     '#zcode-beautify-panel-root[data-offline="1"] #zb-status { display: none; }',
-    '#zcode-beautify-panel-root[data-offline="1"] #zb-fab { border-color: rgba(248,113,113,.7); }'
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-fab { border-color: rgba(248,113,113,.7); }',
+    '#zb-needs-relaunch { display: flex; flex-direction: column; gap: 6px; align-items: center;',
+      ' padding: 10px 12px; background: rgba(120,53,15,.45); font-size: 11px; line-height: 1.5; text-align: center; }',
+    '#zb-needs-relaunch[hidden] { display: none; }',
+    '#zb-recovery { width: 100%; padding: 4px 6px; border-radius: 6px; font-size: 11px; color: inherit;',
+      ' background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); }',
+    '#zb-recovery option { color: #111; }',
+    '#zb-recovery-hint { margin-top: 4px; opacity: .65; font-size: 10px; line-height: 1.45; }'
   ].join('');
 
   var style = document.createElement('style');
@@ -110128,6 +110328,10 @@ function buildPanelScript(apiPort) {
     '    <div>\u26A0 \u7F8E\u5316\u670D\u52A1\u672A\u8FD0\u884C,\u9762\u677F\u4E0D\u53EF\u7528</div>' +
     '    <div class="zb-hint">\u5728\u63D2\u4EF6\u76EE\u5F55\u6267\u884C <code>node dist/cli.js serve --detach</code> \u542F\u52A8</div>' +
     '    <button class="zb-btn" id="zb-retry">\u91CD\u8BD5\u8FDE\u63A5</button>' +
+    '  </div>' +
+    '  <div id="zb-needs-relaunch" hidden>' +
+    '    <div>\u26A0 ZCode \u7F8E\u5316\u63D2\u4EF6\u8FD8\u6CA1\u751F\u6548,\u9700\u8981\u91CD\u542F\u4E00\u4E0B ZCode</div>' +
+    '    <button class="zb-btn" id="zb-relaunch">\u7ACB\u5373\u91CD\u542F ZCode</button>' +
     '  </div>' +
     '  <div id="zb-body">' +
     '    <div class="zb-row"><label title="\u80CC\u666F\u6A21\u7CCA\u7A0B\u5EA6(\u50CF\u7D20)"><span>\u80CC\u666F\u6A21\u7CCA</span><span><span id="zb-blur-val">0</span>px</span></label>' +
@@ -110148,6 +110352,15 @@ function buildPanelScript(apiPort) {
     '    <div class="zb-row zb-actions">' +
     '      <button class="zb-btn" id="zb-reset" title="\u79FB\u9664\u58C1\u7EB8\u4E0E\u914D\u8272,\u8FD8\u539F ZCode \u9ED8\u8BA4\u5916\u89C2(\u58C1\u7EB8\u4F1A\u88AB\u8BB0\u4F4F,\u53EF\u518D\u6B21\u6062\u590D)">\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2</button>' +
     '    </div>' +
+    '    <div class="zb-row" style="border-top:1px solid rgba(255,255,255,.1);padding-top:8px">' +
+    '      <label title="ZCode \u6BCF\u6B21\u91CD\u542F\u90FD\u4F1A\u4E22\u6389\u58C1\u7EB8\u548C\u914D\u8272,\u8FD9\u91CC\u51B3\u5B9A\u7531\u8C01\u6765\u628A\u5B83\u4EEC\u6062\u590D\u56DE\u6765"><span>\u81EA\u52A8\u6062\u590D</span></label>' +
+    '      <select id="zb-recovery">' +
+    '        <option value="off">\u5173\u95ED</option>' +
+    '        <option value="on-start">ZCode \u542F\u52A8\u65F6\u6062\u590D</option>' +
+    '        <option value="always">\u540E\u53F0\u5E38\u9A7B(\u53EF\u7528\u672C\u9762\u677F)</option>' +
+    '      </select>' +
+    '      <div id="zb-recovery-hint"></div>' +
+    '    </div>' +
     '  </div>' +
     '</div>' +
     '<div id="zb-status"></div>';
@@ -110160,10 +110373,18 @@ function buildPanelScript(apiPort) {
     el.textContent = msg;
     setTimeout(function () { if (el.textContent === msg) el.textContent = ''; }, 2200);
   }
+  function auth(extra) {
+    var h = extra || {};
+    h['x-zb-token'] = TOKEN;
+    return h;
+  }
   function post(path, body, cb) {
-    fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    fetch(API + path, { method: 'POST', headers: auth({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (cb) cb(d); })
+      .then(function (d) {
+        if (d && d.error) { status('\u64CD\u4F5C\u5931\u8D25: ' + d.error); return; }
+        if (cb) cb(d);
+      })
       .catch(function () { status('\u65E0\u6CD5\u8FDE\u63A5\u7F8E\u5316\u670D\u52A1 service unreachable'); });
   }
 
@@ -110196,7 +110417,7 @@ function buildPanelScript(apiPort) {
   function panelOpen() { return !$('zb-panel').hidden; }
   /** Re-check the service: while the panel is open, and always while offline. */
   function beat(on) {
-    if (on && !beatTimer) beatTimer = setInterval(refresh, 4000);
+    if (on && !beatTimer) beatTimer = setInterval(function () { refresh(); refreshStatus(); }, 4000);
     if (!on && beatTimer) { clearInterval(beatTimer); beatTimer = null; }
   }
 
@@ -110221,7 +110442,7 @@ function buildPanelScript(apiPort) {
   }
 
   function refresh() {
-    fetch(API + '/api/config')
+    fetch(API + '/api/config', { headers: auth() })
       .then(function (r) { return r.json(); })
       .then(function (c) {
         setOffline(false);
@@ -110300,11 +110521,60 @@ function buildPanelScript(apiPort) {
     refresh();
   });
 
+  // The service answers but ZCode is not listening for it: either the app is
+  // closed, or it came up without the debug port. The second case is the one
+  // the plugin cannot fix on its own, and the only lever is a proper restart.
+  var RECOVERY_HINTS = {
+    off: 'ZCode \u91CD\u542F\u540E\u4E0D\u4F1A\u81EA\u52A8\u6062\u590D,\u9700\u8981\u624B\u52A8\u91CD\u65B0\u5E94\u7528\u3002',
+    'on-start': 'ZCode \u6BCF\u6B21\u542F\u52A8\u65F6\u81EA\u52A8\u6062\u590D\u4E00\u6B21,\u4E0D\u5360\u5185\u5B58;\u8BBE\u7F6E\u9762\u677F\u4E0D\u4F1A\u81EA\u52A8\u51FA\u73B0\u3002',
+    always: '\u540E\u53F0\u5E38\u9A7B\u4E00\u4E2A\u5C0F\u670D\u52A1(\u7EA6 60MB \u5185\u5B58),\u58C1\u7EB8\u81EA\u52A8\u6062\u590D,\u8BBE\u7F6E\u9762\u677F\u968F\u65F6\u53EF\u7528\u3002'
+  };
+
+  function applyStatus(s) {
+    $('zb-needs-relaunch').hidden = !(s && !s.cdpReachable && s.zcodeRunning);
+    if (s && s.recovery) {
+      var sel = $('zb-recovery');
+      if (sel && document.activeElement !== sel) sel.value = s.recovery.mode;
+      var hint = $('zb-recovery-hint');
+      if (hint) hint.textContent = RECOVERY_HINTS[s.recovery.mode] || '';
+    }
+  }
+
+  function refreshStatus() {
+    fetch(API + '/api/status', { headers: auth() })
+      .then(function (r) { return r.json(); })
+      .then(applyStatus)
+      .catch(function () { /* the offline banner already covers this */ });
+  }
+
+  $('zb-relaunch').addEventListener('click', function () {
+    var btn = this;
+    btn.textContent = '\u6B63\u5728\u91CD\u542F ZCode,\u8BF7\u7A0D\u5019\u2026';
+    btn.disabled = true;
+    post('/api/relaunch', {}, function () {
+      btn.textContent = '\u7ACB\u5373\u91CD\u542F ZCode';
+      btn.disabled = false;
+      status('ZCode \u5DF2\u91CD\u542F,\u58C1\u7EB8\u9A6C\u4E0A\u56DE\u6765');
+      setTimeout(refresh, 2000);
+      setTimeout(refreshStatus, 3000);
+    });
+  });
+
+  $('zb-recovery').addEventListener('change', function () {
+    var value = this.value;
+    post('/api/recovery', { mode: value }, function () {
+      var hint = $('zb-recovery-hint');
+      if (hint) hint.textContent = RECOVERY_HINTS[value] || '';
+      status('\u81EA\u52A8\u6062\u590D\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');
+    });
+  });
+
   $('zb-fab').addEventListener('click', function () {
     var p = $('zb-panel');
     p.hidden = !p.hidden;
     if (!p.hidden) {
       refresh();
+      refreshStatus();
       beat(true);
     } else if (root.getAttribute('data-offline') !== '1') {
       beat(false);
@@ -110317,6 +110587,7 @@ function buildPanelScript(apiPort) {
 
   // Fill in the fit label (and control values) right away, not just on open.
   refresh();
+  refreshStatus();
 
   (function () {
     var head = $('zb-head'), panel = $('zb-panel');
@@ -110374,12 +110645,13 @@ __export(server_exports, {
   startServe: () => startServe
 });
 import http from "node:http";
-import fs5 from "node:fs";
-import path3 from "node:path";
+import fs7 from "node:fs";
+import path5 from "node:path";
+import { randomBytes } from "node:crypto";
 async function getAssets(wallpaperPath) {
-  if (!wallpaperPath || !fs5.existsSync(wallpaperPath))
+  if (!wallpaperPath || !fs7.existsSync(wallpaperPath))
     return void 0;
-  const mtimeMs = fs5.statSync(wallpaperPath).mtimeMs;
+  const mtimeMs = fs7.statSync(wallpaperPath).mtimeMs;
   if (cachedAssets?.file === wallpaperPath && cachedAssets.mtimeMs === mtimeMs) {
     return cachedAssets.assets;
   }
@@ -110391,10 +110663,10 @@ function currentConfig() {
   return { ...DEFAULT_CONFIG, ...loadConfig() };
 }
 function backupFile() {
-  return path3.join(dataDir(), "config.backup.json");
+  return path5.join(dataDir(), "config.backup.json");
 }
 function hasBackup() {
-  return fs5.existsSync(backupFile());
+  return fs7.existsSync(backupFile());
 }
 function publicConfig(config) {
   return {
@@ -110403,7 +110675,7 @@ function publicConfig(config) {
     monet: config.monet,
     wallpaperVisible: config.wallpaperVisible,
     fit: config.fit,
-    wallpaperSet: Boolean(config.wallpaperPath && fs5.existsSync(config.wallpaperPath)),
+    wallpaperSet: Boolean(config.wallpaperPath && fs7.existsSync(config.wallpaperPath)),
     hasBackup: hasBackup(),
     cdpPort: config.port
   };
@@ -110426,28 +110698,33 @@ async function registerScript(session, source) {
   const { identifier } = await session.conn.send("Page.addScriptToEvaluateOnNewDocument", { source });
   return identifier;
 }
-async function holdSession(target, config, apiPort) {
+async function holdSession(target, config, apiPort, token) {
   if (!target.webSocketDebuggerUrl)
     return;
   const conn = await CdpConnection.connect(target.webSocketDebuggerUrl);
-  await conn.send("Page.enable");
-  const session = { conn };
-  const assets = await getAssets(config.wallpaperPath);
-  const payload = buildPayload(config, assets);
-  const bootstrap = buildBootstrapScript({
-    css: payload.css,
-    wallpaperDataUri: payload.wallpaperDataUri,
-    fit: payload.fit
-  });
-  const { identifier } = await conn.send("Page.addScriptToEvaluateOnNewDocument", {
-    source: bootstrap
-  });
-  session.themeScriptId = identifier;
-  await conn.send("Runtime.evaluate", { expression: bootstrap, returnByValue: true });
-  const panelScript = buildPanelScript(apiPort);
-  await conn.send("Page.addScriptToEvaluateOnNewDocument", { source: panelScript });
-  await conn.send("Runtime.evaluate", { expression: panelScript, returnByValue: true });
-  held.set(target.id, session);
+  try {
+    await conn.send("Page.enable");
+    const session = { conn };
+    const assets = await getAssets(config.wallpaperPath);
+    const payload = buildPayload(config, assets);
+    const bootstrap = buildBootstrapScript({
+      css: payload.css,
+      wallpaperDataUri: payload.wallpaperDataUri,
+      fit: payload.fit
+    });
+    const { identifier } = await conn.send("Page.addScriptToEvaluateOnNewDocument", {
+      source: bootstrap
+    });
+    session.themeScriptId = identifier;
+    await conn.send("Runtime.evaluate", { expression: bootstrap, returnByValue: true });
+    const panelScript = buildPanelScript(apiPort, token);
+    await conn.send("Page.addScriptToEvaluateOnNewDocument", { source: panelScript });
+    await conn.send("Runtime.evaluate", { expression: panelScript, returnByValue: true });
+    held.set(target.id, session);
+  } catch (err) {
+    conn.close();
+    throw err;
+  }
 }
 async function pushConfigToSessions(config) {
   const assets = await getAssets(config.wallpaperPath);
@@ -110474,14 +110751,14 @@ async function pushConfigToSessions(config) {
   }
   return ok;
 }
-async function poll(config, apiPort) {
+async function poll(config, apiPort, token) {
   try {
     const targets = pickRendererTargets(await listTargets(config.port));
     const current = new Set(targets.map((t2) => t2.id));
     for (const t2 of targets) {
       if (!held.has(t2.id)) {
         try {
-          await holdSession(t2, config, apiPort);
+          await holdSession(t2, config, apiPort, token);
           console.log(`serve: panel + theme injected into "${t2.title}" (${t2.id})`);
         } catch {
         }
@@ -110493,7 +110770,27 @@ async function poll(config, apiPort) {
         held.delete(id);
       }
     }
-  } catch {
+    runtimeState = {
+      cdpReachable: true,
+      rendererCount: targets.length,
+      zcodeRunning: true,
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+  } catch (err) {
+    for (const [id, session] of held) {
+      session.conn.close();
+      held.delete(id);
+    }
+    if (Date.now() > nextProcessProbe) {
+      nextProcessProbe = Date.now() + 15e3;
+      runtimeState = {
+        cdpReachable: false,
+        rendererCount: 0,
+        zcodeRunning: await isZcodeProcessRunning(),
+        lastError: err.message,
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+    }
   }
 }
 function sendJson(res, code, body) {
@@ -110507,6 +110804,10 @@ function sendJson(res, code, body) {
     res.end(JSON.stringify(body));
   } catch {
   }
+}
+function authorized(req, token) {
+  const header = req.headers["x-zb-token"];
+  return typeof header === "string" && header.length > 0 && header === token;
 }
 async function existingServePid(apiPort) {
   try {
@@ -110538,6 +110839,7 @@ function readBody(req) {
 }
 async function startServe(opts) {
   const { cdpPort, apiPort } = opts;
+  const token = randomBytes(16).toString("hex");
   const runtimeConfig = () => ({ ...currentConfig(), port: cdpPort });
   const persisted = (config) => ({
     ...config,
@@ -110560,6 +110862,10 @@ async function startServe(opts) {
     try {
       if (req.method === "OPTIONS") {
         sendJson(res, 204, {});
+        return;
+      }
+      if (url.pathname !== "/api/health" && !authorized(req, token)) {
+        sendJson(res, 403, { error: "missing or invalid token" });
         return;
       }
       if (req.method === "GET" && url.pathname === "/api/config") {
@@ -110585,10 +110891,10 @@ async function startServe(opts) {
           throw new Error(`image too large (max ${MAX_WALLPAPER_BYTES / 1024 / 1024} MB)`);
         }
         const config = runtimeConfig();
-        fs5.mkdirSync(dataDir(), { recursive: true });
-        const dest = path3.join(dataDir(), "wallpaper" + IMAGE_EXT[m[1]]);
-        fs5.writeFileSync(dest, bytes);
-        cachedAssets = { file: dest, mtimeMs: fs5.statSync(dest).mtimeMs, assets: await loadWallpaper(dest) };
+        fs7.mkdirSync(dataDir(), { recursive: true });
+        const dest = path5.join(dataDir(), "wallpaper" + IMAGE_EXT[m[1]]);
+        fs7.writeFileSync(dest, bytes);
+        cachedAssets = { file: dest, mtimeMs: fs7.statSync(dest).mtimeMs, assets: await loadWallpaper(dest) };
         saveConfig(persisted({ ...config, wallpaperPath: dest }));
         const windows = await pushConfigToSessions({ ...config, wallpaperPath: dest }).catch(() => 0);
         sendJson(res, 200, { ok: true, windows, ...publicConfig({ ...config, wallpaperPath: dest }) });
@@ -110596,9 +110902,9 @@ async function startServe(opts) {
       }
       if (req.method === "POST" && url.pathname === "/api/reset") {
         const stored = loadConfig();
-        if (stored.wallpaperPath && fs5.existsSync(stored.wallpaperPath)) {
-          fs5.mkdirSync(dataDir(), { recursive: true });
-          fs5.writeFileSync(backupFile(), JSON.stringify(stored));
+        if (stored.wallpaperPath && fs7.existsSync(stored.wallpaperPath)) {
+          fs7.mkdirSync(dataDir(), { recursive: true });
+          fs7.writeFileSync(backupFile(), JSON.stringify(stored));
         }
         for (const [id, session] of held) {
           try {
@@ -110621,7 +110927,7 @@ async function startServe(opts) {
       if (req.method === "POST" && url.pathname === "/api/restore") {
         let saved;
         try {
-          saved = JSON.parse(fs5.readFileSync(backupFile(), "utf8"));
+          saved = JSON.parse(fs7.readFileSync(backupFile(), "utf8"));
         } catch {
           throw new Error("no wallpaper backup available");
         }
@@ -110629,6 +110935,37 @@ async function startServe(opts) {
         saveConfig(config);
         const windows = await pushConfigToSessions(config).catch(() => 0);
         sendJson(res, 200, { ok: true, windows, ...publicConfig(config) });
+        return;
+      }
+      if (req.method === "GET" && url.pathname === "/api/status") {
+        sendJson(res, 200, {
+          ...runtimeState,
+          recovery: loadRecovery(),
+          autostart: getAutostartStatus()
+        });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/relaunch") {
+        const result = await relaunchZcode(cdpPort);
+        sendJson(res, 200, { ok: true, ...result });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/recovery") {
+        const body = JSON.parse(await readBody(req));
+        const mode = normalizeMode(body?.mode);
+        if (!mode)
+          throw new Error("mode must be one of: off, on-start, always");
+        const status = applyRecoveryMode(mode, {
+          nodePath: process.execPath,
+          cliPath: cliEntryPath(),
+          cdpPort,
+          apiPort
+        });
+        sendJson(res, 200, {
+          ok: true,
+          recovery: { mode: status.mode, updatedAt: status.updatedAt },
+          autostart: status.autostart
+        });
         return;
       }
       if (req.method === "GET" && url.pathname === "/api/health") {
@@ -110649,13 +110986,13 @@ async function startServe(opts) {
   });
   console.log(`serve: control API on http://127.0.0.1:${apiPort} \u2014 Ctrl+C to stop`);
   console.log(`serve: injecting into ZCode renderers on CDP port ${cdpPort}`);
-  await poll(runtimeConfig(), apiPort);
+  await poll(runtimeConfig(), apiPort, token);
   for (; ; ) {
     await new Promise((r2) => setTimeout(r2, POLL_MS));
-    await poll(runtimeConfig(), apiPort);
+    await poll(runtimeConfig(), apiPort, token);
   }
 }
-var MAX_WALLPAPER_BYTES, MAX_BODY_BYTES, POLL_MS, cachedAssets, held, IMAGE_EXT;
+var MAX_WALLPAPER_BYTES, MAX_BODY_BYTES, POLL_MS, runtimeState, nextProcessProbe, cachedAssets, held, IMAGE_EXT;
 var init_server = __esm({
   "dist/core/server.js"() {
     "use strict";
@@ -110664,9 +111001,13 @@ var init_server = __esm({
     init_monet();
     init_panelScript();
     init_launch();
+    init_recovery();
+    init_autostart();
     MAX_WALLPAPER_BYTES = 20 * 1024 * 1024;
     MAX_BODY_BYTES = MAX_WALLPAPER_BYTES + 1024 * 1024;
     POLL_MS = 1500;
+    runtimeState = { cdpReachable: false, rendererCount: 0, zcodeRunning: false };
+    nextProcessProbe = 0;
     held = /* @__PURE__ */ new Map();
     IMAGE_EXT = {
       "image/jpeg": ".jpg",
@@ -110682,8 +111023,154 @@ var init_server = __esm({
 init_inject();
 init_launch();
 init_session();
-import fs6 from "node:fs";
-import path4 from "node:path";
+init_autostart();
+init_recovery();
+import fs8 from "node:fs";
+import path6 from "node:path";
+
+// dist/core/launchers.js
+import { execFile as execFile2 } from "node:child_process";
+import { promisify as promisify2 } from "node:util";
+var execFileAsync2 = promisify2(execFile2);
+function psScript(port, dryRun) {
+  return `
+$ErrorActionPreference = 'Continue'
+# Without this, Chinese Windows error strings come back as mojibake through
+# Node's UTF-8 stdout decoding.
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$port = ${port}
+$dryRun = $${dryRun ? "true" : "false"}
+$flag = ' --remote-debugging-port=' + $port
+$results = New-Object System.Collections.ArrayList
+
+function Add-Result($kind, $p, $before, $after, $status, $reason) {
+  [void]$results.Add([pscustomobject]@{
+    kind = $kind; path = $p; before = $before; after = $after
+    status = $status; reason = $reason
+  })
+}
+
+# --- shortcuts -------------------------------------------------------------
+$dirs = @(
+  (Join-Path $env:USERPROFILE 'Desktop'),
+  (Join-Path $env:APPDATA 'Microsoft\\Windows\\Start Menu\\Programs'),
+  (Join-Path $env:PUBLIC 'Desktop'),
+  (Join-Path $env:ProgramData 'Microsoft\\Windows\\Start Menu\\Programs')
+)
+
+$lnks = @()
+foreach ($d in $dirs) {
+  if ($d -and (Test-Path -LiteralPath $d)) {
+    $lnks += @(Get-ChildItem -LiteralPath $d -Filter '*.lnk' -Recurse -ErrorAction SilentlyContinue)
+  }
+}
+
+$wsh = New-Object -ComObject WScript.Shell
+foreach ($item in $lnks) {
+  try { $sc = $wsh.CreateShortcut($item.FullName) } catch { continue }
+  $target = [string]$sc.TargetPath
+  if ($target -notlike '*ZCode.exe') { continue }
+
+  $before = [string]$sc.Arguments
+  if ($before -match 'remote-debugging-port') {
+    Add-Result 'shortcut' $item.FullName $before $before 'already-ok' $null
+    continue
+  }
+
+  $after = ($before.Trim() + $flag).Trim()
+  if ($dryRun) {
+    Add-Result 'shortcut' $item.FullName $before $after 'updated' 'dry-run'
+    continue
+  }
+  try {
+    $sc.Arguments = $after
+    $sc.Save()
+    Add-Result 'shortcut' $item.FullName $before $after 'updated' $null
+  } catch {
+    Add-Result 'shortcut' $item.FullName $before $after 'failed' $_.Exception.Message
+  }
+}
+
+# --- HKCU protocol / shell handlers ----------------------------------------
+$keys = @(
+  'HKCU:\\Software\\Classes\\zcode\\shell\\open\\command',
+  'HKCU:\\Software\\Classes\\Directory\\shell\\ZCode.OpenInZCode\\command',
+  'HKCU:\\Software\\Classes\\Drive\\shell\\ZCode.OpenInZCode\\command'
+)
+
+foreach ($k in $keys) {
+  if (-not (Test-Path -LiteralPath $k)) { continue }
+  try {
+    $key = Get-Item -LiteralPath $k
+    $before = [string]$key.GetValue('')
+    if ($before -notmatch 'ZCode\\.exe') { continue }
+    if ($before -match 'remote-debugging-port') {
+      Add-Result 'registry' $k $before $before 'already-ok' $null
+      continue
+    }
+    # Insert the flag directly after the executable token, keeping any
+    # placeholders ("%1") and quoting untouched.
+    $after = $before -replace '^(\\s*("[^"]+"|\\S+))', ('$1' + $flag)
+    if ($dryRun) {
+      Add-Result 'registry' $k $before $after 'updated' 'dry-run'
+      continue
+    }
+    try {
+      # Get-Item hands back a read-only handle, so the default value can only be
+      # changed through a .NET key opened with write access.
+      $sub = $k -replace '^HKCU:\\\\', ''
+      $writable = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey($sub, $true)
+      if (-not $writable) { throw 'cannot open the key for writing' }
+      $writable.SetValue('', $after, [Microsoft.Win32.RegistryValueKind]::String)
+      $writable.Close()
+      Add-Result 'registry' $k $before $after 'updated' $null
+    } catch {
+      Add-Result 'registry' $k $before $after 'failed' $_.Exception.Message
+    }
+  } catch {
+    Add-Result 'registry' $k '' '' 'failed' $_.Exception.Message
+  }
+}
+
+@($results) | ConvertTo-Json -Depth 4 -Compress
+`;
+}
+async function repairLaunchers(opts) {
+  const dryRun = opts.dryRun ?? false;
+  if (process.platform !== "win32") {
+    return {
+      supported: false,
+      dryRun,
+      fixes: [],
+      error: "launcher repair is only implemented for Windows; on other platforms edit your app shortcut manually"
+    };
+  }
+  const encoded = Buffer.from(psScript(opts.port, dryRun), "utf16le").toString("base64");
+  try {
+    const { stdout } = await execFileAsync2("powershell", ["-NoProfile", "-NonInteractive", "-EncodedCommand", encoded], { maxBuffer: 8 * 1024 * 1024, timeout: 12e4 });
+    const trimmed = stdout.trim();
+    if (!trimmed)
+      return { supported: true, dryRun, fixes: [] };
+    const raw = JSON.parse(trimmed);
+    const list = Array.isArray(raw) ? raw : [raw];
+    return {
+      supported: true,
+      dryRun,
+      fixes: list.map((r2) => ({
+        kind: r2.kind === "registry" ? "registry" : "shortcut",
+        path: r2.path,
+        before: r2.before,
+        after: r2.after,
+        status: r2.status === "updated" || r2.status === "already-ok" ? r2.status : "failed",
+        reason: r2.reason ?? void 0
+      }))
+    };
+  } catch (err) {
+    return { supported: true, dryRun, fixes: [], error: err.message };
+  }
+}
+
+// dist/cli.js
 var USAGE = `zcode-beautify <command> [options]
 
 Commands:
@@ -110701,7 +111188,14 @@ Commands:
   serve [--port N] [--api-port M] [--detach]
                                  Watch mode + settings panel + local API (default API port 9223)
                                  --detach runs it in the background, outliving this shell
+  recovery [mode]                Restore the theme after ZCode restarts:
+                                 off | on-start (default) | always
+  autostart [install|uninstall]  Start the resident service at sign-in (used by mode "always")
+  repair-launchers [--dry-run]   Add --remote-debugging-port to ZCode launch entries missing it
 `;
+function autostartSpec(cdpPort, apiPort = 9223) {
+  return { nodePath: process.execPath, cliPath: cliEntryPath(), cdpPort, apiPort };
+}
 async function main() {
   const [cmd, ...rest] = process.argv.slice(2);
   const flag = (name) => {
@@ -110780,6 +111274,61 @@ Quit ZCode completely (including any tray icon), then run \`zcode-beautify launc
         await startServe2({ cdpPort: port, apiPort });
         break;
       }
+      case "recovery": {
+        const wanted = normalizeMode(rest[0]);
+        if (rest[0] !== void 0 && wanted === void 0) {
+          console.error(`Unknown recovery mode "${rest[0]}". Use one of: ${RECOVERY_MODES.join(", ")}.`);
+          process.exitCode = 1;
+          break;
+        }
+        if (wanted) {
+          const status = applyRecoveryMode(wanted, autostartSpec(port));
+          console.log(`Recovery mode set to "${wanted}".`);
+          if (wanted === "always") {
+            console.log(status.autostart.installed ? `Autostart entry written to ${status.autostart.entryPath} (active from the next sign-in).` : `Could not register autostart${status.autostart.note ? `: ${status.autostart.note}` : ""}.`);
+          } else if (status.autostart.installed === false) {
+            console.log("Autostart entry removed.");
+          }
+          console.log(JSON.stringify(status, null, 2));
+          break;
+        }
+        console.log(JSON.stringify(recoveryStatus(), null, 2));
+        break;
+      }
+      case "autostart": {
+        const apiPort = Number(flag("--api-port") ?? 9223);
+        const action = rest[0] ?? "status";
+        if (action === "install") {
+          const status = installAutostart(autostartSpec(port, apiPort));
+          if (!status.supported) {
+            console.error(`Autostart is not supported on ${status.platform}.`);
+            process.exitCode = 1;
+            break;
+          }
+          console.log(`Autostart entry written to ${status.entryPath} (active from the next sign-in).`);
+        } else if (action === "uninstall") {
+          const before = getAutostartStatus();
+          uninstallAutostart();
+          console.log(before.installed ? "Autostart entry removed." : "No autostart entry was installed.");
+        } else {
+          console.log(JSON.stringify(getAutostartStatus(), null, 2));
+        }
+        break;
+      }
+      case "repair-launchers": {
+        const report = await repairLaunchers({ port, dryRun: has("--dry-run") });
+        if (report.error) {
+          console.error(report.error);
+          process.exitCode = 1;
+          break;
+        }
+        for (const f2 of report.fixes) {
+          console.log(`[${f2.status}] ${f2.path}${f2.reason ? ` \u2014 ${f2.reason}` : ""}`);
+        }
+        const updated = report.fixes.filter((f2) => f2.status === "updated").length;
+        console.log(report.dryRun ? `${updated} of ${report.fixes.length} entry(ies) would be updated.` : `${updated} of ${report.fixes.length} entry(ies) updated.`);
+        break;
+      }
       case "help":
       case "--help":
       case "-h":
@@ -110802,12 +111351,12 @@ async function startServeDetached(cdpPort, apiPort) {
   if (already !== void 0) {
     throw new Error(`a beautify service is already running on http://127.0.0.1:${apiPort} (pid ${already}) \u2014 open its panel, or stop that process first`);
   }
-  fs6.mkdirSync(dataDir(), { recursive: true });
-  const logFile = path4.join(dataDir(), "serve.log");
-  const out = fs6.openSync(logFile, "a");
+  fs8.mkdirSync(dataDir(), { recursive: true });
+  const logFile = path6.join(dataDir(), "serve.log");
+  const out = fs8.openSync(logFile, "a");
   const child = spawn2(process.execPath, [process.argv[1], "serve", "--port", String(cdpPort), "--api-port", String(apiPort)], { detached: true, stdio: ["ignore", out, out], windowsHide: true });
   child.unref();
-  fs6.closeSync(out);
+  fs8.closeSync(out);
   for (let i2 = 0; i2 < 20; i2++) {
     await new Promise((r2) => setTimeout(r2, 500));
     try {

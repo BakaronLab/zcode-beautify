@@ -12,6 +12,7 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import { randomBytes } from "node:crypto";
 import {
   CdpConnection,
   buildBootstrapScript,
@@ -22,7 +23,9 @@ import {
 import { buildPayload, DEFAULT_CONFIG, type BeautifyConfig } from "./inject.js";
 import { loadWallpaper, type WallpaperAssets } from "./monet.js";
 import { buildPanelScript } from "../panel/panelScript.js";
-import { dataDir, loadConfig, saveConfig } from "./launch.js";
+import { dataDir, isZcodeProcessRunning, loadConfig, relaunchZcode, saveConfig } from "./launch.js";
+import { applyRecoveryMode, loadRecovery, normalizeMode } from "./recovery.js";
+import { cliEntryPath, getAutostartStatus } from "./autostart.js";
 
 const MAX_WALLPAPER_BYTES = 20 * 1024 * 1024;
 const MAX_BODY_BYTES = MAX_WALLPAPER_BYTES + 1024 * 1024;
@@ -37,6 +40,24 @@ interface HeldSession {
   conn: CdpConnection;
   themeScriptId?: string;
 }
+
+/**
+ * What the last poll saw. The panel has to tell three situations apart — healthy,
+ * "ZCode is running but its debug port is closed", and "ZCode is not running" —
+ * because each one asks the user for something different.
+ */
+interface RuntimeState {
+  cdpReachable: boolean;
+  rendererCount: number;
+  zcodeRunning: boolean;
+  lastError?: string;
+  updatedAt?: string;
+}
+
+let runtimeState: RuntimeState = { cdpReachable: false, rendererCount: 0, zcodeRunning: false };
+
+/** Walking the process table on every failed poll would be wasteful. */
+let nextProcessProbe = 0;
 
 // One decoded image + extracted theme, reused across slider updates so the
 // panel feels instant. Invalidated whenever the wallpaper file changes.
@@ -103,31 +124,40 @@ async function registerScript(
 async function holdSession(
   target: { id: string; webSocketDebuggerUrl?: string },
   config: BeautifyConfig,
-  apiPort: number
+  apiPort: number,
+  token: string
 ): Promise<void> {
   if (!target.webSocketDebuggerUrl) return;
   const conn = await CdpConnection.connect(target.webSocketDebuggerUrl);
-  await conn.send("Page.enable");
-  const session: HeldSession = { conn };
+  // Anything that fails once the socket is up has to close it: the caller
+  // retries every tick, so a connection dropped on the floor here would leave
+  // one orphaned WebSocket per tick for as long as the failure lasts.
+  try {
+    await conn.send("Page.enable");
+    const session: HeldSession = { conn };
 
-  const assets = await getAssets(config.wallpaperPath);
-  const payload = buildPayload(config, assets);
-  const bootstrap = buildBootstrapScript({
-    css: payload.css,
-    wallpaperDataUri: payload.wallpaperDataUri,
-    fit: payload.fit,
-  });
-  const { identifier } = await conn.send("Page.addScriptToEvaluateOnNewDocument", {
-    source: bootstrap,
-  });
-  session.themeScriptId = identifier;
-  await conn.send("Runtime.evaluate", { expression: bootstrap, returnByValue: true });
+    const assets = await getAssets(config.wallpaperPath);
+    const payload = buildPayload(config, assets);
+    const bootstrap = buildBootstrapScript({
+      css: payload.css,
+      wallpaperDataUri: payload.wallpaperDataUri,
+      fit: payload.fit,
+    });
+    const { identifier } = await conn.send("Page.addScriptToEvaluateOnNewDocument", {
+      source: bootstrap,
+    });
+    session.themeScriptId = identifier;
+    await conn.send("Runtime.evaluate", { expression: bootstrap, returnByValue: true });
 
-  const panelScript = buildPanelScript(apiPort);
-  await conn.send("Page.addScriptToEvaluateOnNewDocument", { source: panelScript });
-  await conn.send("Runtime.evaluate", { expression: panelScript, returnByValue: true });
+    const panelScript = buildPanelScript(apiPort, token);
+    await conn.send("Page.addScriptToEvaluateOnNewDocument", { source: panelScript });
+    await conn.send("Runtime.evaluate", { expression: panelScript, returnByValue: true });
 
-  held.set(target.id, session);
+    held.set(target.id, session);
+  } catch (err) {
+    conn.close();
+    throw err;
+  }
 }
 
 /** Re-evaluates the theme bootstrap in every live session after a config change. */
@@ -158,14 +188,14 @@ async function pushConfigToSessions(config: BeautifyConfig): Promise<number> {
   return ok;
 }
 
-async function poll(config: BeautifyConfig, apiPort: number): Promise<void> {
+async function poll(config: BeautifyConfig, apiPort: number, token: string): Promise<void> {
   try {
     const targets = pickRendererTargets(await listTargets(config.port));
     const current = new Set(targets.map((t) => t.id));
     for (const t of targets) {
       if (!held.has(t.id)) {
         try {
-          await holdSession(t, config, apiPort);
+          await holdSession(t, config, apiPort, token);
           console.log(`serve: panel + theme injected into "${t.title}" (${t.id})`);
         } catch {
           /* retry next tick */
@@ -178,8 +208,30 @@ async function poll(config: BeautifyConfig, apiPort: number): Promise<void> {
         held.delete(id);
       }
     }
-  } catch {
-    /* CDP not reachable; keep polling */
+    runtimeState = {
+      cdpReachable: true,
+      rendererCount: targets.length,
+      zcodeRunning: true,
+      updatedAt: new Date().toISOString(),
+    };
+  } catch (err) {
+    // No CDP endpoint: either ZCode is closed, or it is running without the
+    // debug port. Either way the held sockets are dead weight — drop them so a
+    // later restart injects afresh instead of matching a stale target id.
+    for (const [id, session] of held) {
+      session.conn.close();
+      held.delete(id);
+    }
+    if (Date.now() > nextProcessProbe) {
+      nextProcessProbe = Date.now() + 15_000;
+      runtimeState = {
+        cdpReachable: false,
+        rendererCount: 0,
+        zcodeRunning: await isZcodeProcessRunning(),
+        lastError: (err as Error).message,
+        updatedAt: new Date().toISOString(),
+      };
+    }
   }
 }
 
@@ -199,6 +251,12 @@ function sendJson(res: http.ServerResponse, code: number, body: unknown): void {
   } catch {
     /* response already finished or socket gone */
   }
+}
+
+/** Only the injected panel carries the token; nothing else on the machine has it. */
+function authorized(req: http.IncomingMessage, token: string): boolean {
+  const header = req.headers["x-zb-token"];
+  return typeof header === "string" && header.length > 0 && header === token;
 }
 
 /** True when another `serve` of this plugin already owns the port. */
@@ -243,6 +301,11 @@ const IMAGE_EXT: Record<string, string> = {
 export async function startServe(opts: ServeOptions): Promise<void> {
   const { cdpPort, apiPort } = opts;
 
+  // This API can replace the user's wallpaper and even relaunch ZCode, and it
+  // answers anything that can reach localhost. The token only ever travels
+  // inside the injected panel script, so a random web page cannot drive it.
+  const token = randomBytes(16).toString("hex");
+
   // `serve --port N` must win over the port stored in the config file: reading
   // the merged config alone silently dialed the stored port while still
   // printing the flag's value.
@@ -278,6 +341,13 @@ export async function startServe(opts: ServeOptions): Promise<void> {
     try {
       if (req.method === "OPTIONS") {
         sendJson(res, 204, {});
+        return;
+      }
+
+      // /api/health stays open: it identifies the service but exposes nothing,
+      // and the CLI relies on it to detect an already-running instance.
+      if (url.pathname !== "/api/health" && !authorized(req, token)) {
+        sendJson(res, 403, { error: "missing or invalid token" });
         return;
       }
 
@@ -357,6 +427,39 @@ export async function startServe(opts: ServeOptions): Promise<void> {
         return;
       }
 
+      if (req.method === "GET" && url.pathname === "/api/status") {
+        sendJson(res, 200, {
+          ...runtimeState,
+          recovery: loadRecovery(),
+          autostart: getAutostartStatus(),
+        });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/relaunch") {
+        const result = await relaunchZcode(cdpPort);
+        sendJson(res, 200, { ok: true, ...result });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/recovery") {
+        const body = JSON.parse(await readBody(req));
+        const mode = normalizeMode(body?.mode);
+        if (!mode) throw new Error("mode must be one of: off, on-start, always");
+        const status = applyRecoveryMode(mode, {
+          nodePath: process.execPath,
+          cliPath: cliEntryPath(),
+          cdpPort,
+          apiPort,
+        });
+        sendJson(res, 200, {
+          ok: true,
+          recovery: { mode: status.mode, updatedAt: status.updatedAt },
+          autostart: status.autostart,
+        });
+        return;
+      }
+
       if (req.method === "GET" && url.pathname === "/api/health") {
         sendJson(res, 200, { ok: true, service: "zcode-beautify", pid: process.pid });
         return;
@@ -383,9 +486,9 @@ export async function startServe(opts: ServeOptions): Promise<void> {
   console.log(`serve: injecting into ZCode renderers on CDP port ${cdpPort}`);
 
   // Initial pass, then keep polling so restarts of the app get re-injected.
-  await poll(runtimeConfig(), apiPort);
+  await poll(runtimeConfig(), apiPort, token);
   for (;;) {
     await new Promise((r) => setTimeout(r, POLL_MS));
-    await poll(runtimeConfig(), apiPort);
+    await poll(runtimeConfig(), apiPort, token);
   }
 }

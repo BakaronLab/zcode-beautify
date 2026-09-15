@@ -155,3 +155,37 @@ export async function launchZcode(port: number): Promise<LaunchResult> {
   }
   return { started: true };
 }
+
+async function killZcode(): Promise<boolean> {
+  try {
+    if (process.platform === "win32") {
+      await execFileAsync("taskkill", ["/F", "/IM", "ZCode.exe"]);
+    } else {
+      await execFileAsync("pkill", ["-x", process.platform === "darwin" ? "ZCode" : "zcode"]);
+    }
+    return true;
+  } catch {
+    return false; // nothing was running
+  }
+}
+
+/**
+ * Replaces a running ZCode with a fresh instance that has the CDP port open.
+ *
+ * `--remote-debugging-port` is read once at process startup, so an instance that
+ * came up without it can never grow the port. ZCode keeps its window in the tray
+ * (`closeToTrayOnWindows`), which is why closing the window is not enough and
+ * the processes have to be terminated outright — callers must ask the user
+ * first, since anything unsaved in a conversation is lost.
+ */
+export async function relaunchZcode(port: number): Promise<{ killed: boolean; started: boolean }> {
+  const killed = await killZcode();
+
+  // The single-instance lock is released asynchronously.
+  for (let i = 0; i < 20 && (await isZcodeProcessRunning()); i++) {
+    await new Promise((r) => setTimeout(r, 500));
+  }
+
+  const result = await launchZcode(port);
+  return { killed, started: result.started || result.reason === "already-running-with-cdp" };
+}

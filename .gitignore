@@ -28,3 +28,8 @@ Thumbs.db
 coverage/
 screenshots/
 packages/
+
+# local scratch: CDP probe profiles, captured bundles, working notes
+experiments/
+assets/
+.zcode/

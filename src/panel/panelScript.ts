@@ -11,10 +11,11 @@
 
 export const PANEL_ROOT_ID = "zcode-beautify-panel-root";
 
-export function buildPanelScript(apiPort: number): string {
+export function buildPanelScript(apiPort: number, token: string): string {
   const api = `http://127.0.0.1:${apiPort}`;
   return `(function(){
   var API = ${JSON.stringify(api)};
+  var TOKEN = ${JSON.stringify(token)};
   var ROOT_ID = ${JSON.stringify(PANEL_ROOT_ID)};
   // Always rebuild: an older panel left in the DOM would otherwise shadow the
   // current script version forever (the old build skipped installation).
@@ -60,7 +61,14 @@ export function buildPanelScript(apiPort: number): string {
     // as a real (wrong) setting.
     '#zcode-beautify-panel-root[data-offline="1"] #zb-body { opacity: .45; pointer-events: none; }',
     '#zcode-beautify-panel-root[data-offline="1"] #zb-status { display: none; }',
-    '#zcode-beautify-panel-root[data-offline="1"] #zb-fab { border-color: rgba(248,113,113,.7); }'
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-fab { border-color: rgba(248,113,113,.7); }',
+    '#zb-needs-relaunch { display: flex; flex-direction: column; gap: 6px; align-items: center;',
+      ' padding: 10px 12px; background: rgba(120,53,15,.45); font-size: 11px; line-height: 1.5; text-align: center; }',
+    '#zb-needs-relaunch[hidden] { display: none; }',
+    '#zb-recovery { width: 100%; padding: 4px 6px; border-radius: 6px; font-size: 11px; color: inherit;',
+      ' background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); }',
+    '#zb-recovery option { color: #111; }',
+    '#zb-recovery-hint { margin-top: 4px; opacity: .65; font-size: 10px; line-height: 1.45; }'
   ].join('');
 
   var style = document.createElement('style');
@@ -78,6 +86,10 @@ export function buildPanelScript(apiPort: number): string {
     '    <div>⚠ 美化服务未运行,面板不可用</div>' +
     '    <div class="zb-hint">在插件目录执行 <code>node dist/cli.js serve --detach</code> 启动</div>' +
     '    <button class="zb-btn" id="zb-retry">重试连接</button>' +
+    '  </div>' +
+    '  <div id="zb-needs-relaunch" hidden>' +
+    '    <div>⚠ ZCode 美化插件还没生效,需要重启一下 ZCode</div>' +
+    '    <button class="zb-btn" id="zb-relaunch">立即重启 ZCode</button>' +
     '  </div>' +
     '  <div id="zb-body">' +
     '    <div class="zb-row"><label title="背景模糊程度(像素)"><span>背景模糊</span><span><span id="zb-blur-val">0</span>px</span></label>' +
@@ -98,6 +110,15 @@ export function buildPanelScript(apiPort: number): string {
     '    <div class="zb-row zb-actions">' +
     '      <button class="zb-btn" id="zb-reset" title="移除壁纸与配色,还原 ZCode 默认外观(壁纸会被记住,可再次恢复)">还原默认外观</button>' +
     '    </div>' +
+    '    <div class="zb-row" style="border-top:1px solid rgba(255,255,255,.1);padding-top:8px">' +
+    '      <label title="ZCode 每次重启都会丢掉壁纸和配色,这里决定由谁来把它们恢复回来"><span>自动恢复</span></label>' +
+    '      <select id="zb-recovery">' +
+    '        <option value="off">关闭</option>' +
+    '        <option value="on-start">ZCode 启动时恢复</option>' +
+    '        <option value="always">后台常驻(可用本面板)</option>' +
+    '      </select>' +
+    '      <div id="zb-recovery-hint"></div>' +
+    '    </div>' +
     '  </div>' +
     '</div>' +
     '<div id="zb-status"></div>';
@@ -110,10 +131,18 @@ export function buildPanelScript(apiPort: number): string {
     el.textContent = msg;
     setTimeout(function () { if (el.textContent === msg) el.textContent = ''; }, 2200);
   }
+  function auth(extra) {
+    var h = extra || {};
+    h['x-zb-token'] = TOKEN;
+    return h;
+  }
   function post(path, body, cb) {
-    fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    fetch(API + path, { method: 'POST', headers: auth({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (cb) cb(d); })
+      .then(function (d) {
+        if (d && d.error) { status('操作失败: ' + d.error); return; }
+        if (cb) cb(d);
+      })
       .catch(function () { status('无法连接美化服务 service unreachable'); });
   }
 
@@ -146,7 +175,7 @@ export function buildPanelScript(apiPort: number): string {
   function panelOpen() { return !$('zb-panel').hidden; }
   /** Re-check the service: while the panel is open, and always while offline. */
   function beat(on) {
-    if (on && !beatTimer) beatTimer = setInterval(refresh, 4000);
+    if (on && !beatTimer) beatTimer = setInterval(function () { refresh(); refreshStatus(); }, 4000);
     if (!on && beatTimer) { clearInterval(beatTimer); beatTimer = null; }
   }
 
@@ -171,7 +200,7 @@ export function buildPanelScript(apiPort: number): string {
   }
 
   function refresh() {
-    fetch(API + '/api/config')
+    fetch(API + '/api/config', { headers: auth() })
       .then(function (r) { return r.json(); })
       .then(function (c) {
         setOffline(false);
@@ -250,11 +279,60 @@ export function buildPanelScript(apiPort: number): string {
     refresh();
   });
 
+  // The service answers but ZCode is not listening for it: either the app is
+  // closed, or it came up without the debug port. The second case is the one
+  // the plugin cannot fix on its own, and the only lever is a proper restart.
+  var RECOVERY_HINTS = {
+    off: 'ZCode 重启后不会自动恢复,需要手动重新应用。',
+    'on-start': 'ZCode 每次启动时自动恢复一次,不占内存;设置面板不会自动出现。',
+    always: '后台常驻一个小服务(约 60MB 内存),壁纸自动恢复,设置面板随时可用。'
+  };
+
+  function applyStatus(s) {
+    $('zb-needs-relaunch').hidden = !(s && !s.cdpReachable && s.zcodeRunning);
+    if (s && s.recovery) {
+      var sel = $('zb-recovery');
+      if (sel && document.activeElement !== sel) sel.value = s.recovery.mode;
+      var hint = $('zb-recovery-hint');
+      if (hint) hint.textContent = RECOVERY_HINTS[s.recovery.mode] || '';
+    }
+  }
+
+  function refreshStatus() {
+    fetch(API + '/api/status', { headers: auth() })
+      .then(function (r) { return r.json(); })
+      .then(applyStatus)
+      .catch(function () { /* the offline banner already covers this */ });
+  }
+
+  $('zb-relaunch').addEventListener('click', function () {
+    var btn = this;
+    btn.textContent = '正在重启 ZCode,请稍候…';
+    btn.disabled = true;
+    post('/api/relaunch', {}, function () {
+      btn.textContent = '立即重启 ZCode';
+      btn.disabled = false;
+      status('ZCode 已重启,壁纸马上回来');
+      setTimeout(refresh, 2000);
+      setTimeout(refreshStatus, 3000);
+    });
+  });
+
+  $('zb-recovery').addEventListener('change', function () {
+    var value = this.value;
+    post('/api/recovery', { mode: value }, function () {
+      var hint = $('zb-recovery-hint');
+      if (hint) hint.textContent = RECOVERY_HINTS[value] || '';
+      status('自动恢复设置已保存');
+    });
+  });
+
   $('zb-fab').addEventListener('click', function () {
     var p = $('zb-panel');
     p.hidden = !p.hidden;
     if (!p.hidden) {
       refresh();
+      refreshStatus();
       beat(true);
     } else if (root.getAttribute('data-offline') !== '1') {
       beat(false);
@@ -267,6 +345,7 @@ export function buildPanelScript(apiPort: number): string {
 
   // Fill in the fit label (and control values) right away, not just on open.
   refresh();
+  refreshStatus();
 
   (function () {
     var head = $('zb-head'), panel = $('zb-panel');

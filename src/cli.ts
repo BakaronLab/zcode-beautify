@@ -16,6 +16,9 @@ import { applyToZCode, type BeautifyConfig } from "./core/inject.js";
 import type { ApplyOptions } from "./core/session.js";
 import { launchZcode, dataDir } from "./core/launch.js";
 import { applyWallpaper, resetAppearance } from "./core/session.js";
+import { cliEntryPath, getAutostartStatus, installAutostart, uninstallAutostart, type AutostartSpec } from "./core/autostart.js";
+import { RECOVERY_MODES, applyRecoveryMode, normalizeMode, recoveryStatus } from "./core/recovery.js";
+import { repairLaunchers } from "./core/launchers.js";
 
 const USAGE = `zcode-beautify <command> [options]
 
@@ -34,7 +37,15 @@ Commands:
   serve [--port N] [--api-port M] [--detach]
                                  Watch mode + settings panel + local API (default API port 9223)
                                  --detach runs it in the background, outliving this shell
+  recovery [mode]                Restore the theme after ZCode restarts:
+                                 off | on-start (default) | always
+  autostart [install|uninstall]  Start the resident service at sign-in (used by mode "always")
+  repair-launchers [--dry-run]   Add --remote-debugging-port to ZCode launch entries missing it
 `;
+
+function autostartSpec(cdpPort: number, apiPort = 9223): AutostartSpec {
+  return { nodePath: process.execPath, cliPath: cliEntryPath(), cdpPort, apiPort };
+}
 
 async function main(): Promise<void> {
   const [cmd, ...rest] = process.argv.slice(2);
@@ -115,6 +126,69 @@ async function main(): Promise<void> {
         }
         const { startServe } = await import("./core/server.js");
         await startServe({ cdpPort: port, apiPort });
+        break;
+      }
+      case "recovery": {
+        const wanted = normalizeMode(rest[0]);
+        if (rest[0] !== undefined && wanted === undefined) {
+          console.error(`Unknown recovery mode "${rest[0]}". Use one of: ${RECOVERY_MODES.join(", ")}.`);
+          process.exitCode = 1;
+          break;
+        }
+        if (wanted) {
+          const status = applyRecoveryMode(wanted, autostartSpec(port));
+          console.log(`Recovery mode set to "${wanted}".`);
+          if (wanted === "always") {
+            console.log(
+              status.autostart.installed
+                ? `Autostart entry written to ${status.autostart.entryPath} (active from the next sign-in).`
+                : `Could not register autostart${status.autostart.note ? `: ${status.autostart.note}` : ""}.`
+            );
+          } else if (status.autostart.installed === false) {
+            console.log("Autostart entry removed.");
+          }
+          console.log(JSON.stringify(status, null, 2));
+          break;
+        }
+        console.log(JSON.stringify(recoveryStatus(), null, 2));
+        break;
+      }
+      case "autostart": {
+        const apiPort = Number(flag("--api-port") ?? 9223);
+        const action = rest[0] ?? "status";
+        if (action === "install") {
+          const status = installAutostart(autostartSpec(port, apiPort));
+          if (!status.supported) {
+            console.error(`Autostart is not supported on ${status.platform}.`);
+            process.exitCode = 1;
+            break;
+          }
+          console.log(`Autostart entry written to ${status.entryPath} (active from the next sign-in).`);
+        } else if (action === "uninstall") {
+          const before = getAutostartStatus();
+          uninstallAutostart();
+          console.log(before.installed ? "Autostart entry removed." : "No autostart entry was installed.");
+        } else {
+          console.log(JSON.stringify(getAutostartStatus(), null, 2));
+        }
+        break;
+      }
+      case "repair-launchers": {
+        const report = await repairLaunchers({ port, dryRun: has("--dry-run") });
+        if (report.error) {
+          console.error(report.error);
+          process.exitCode = 1;
+          break;
+        }
+        for (const f of report.fixes) {
+          console.log(`[${f.status}] ${f.path}${f.reason ? ` — ${f.reason}` : ""}`);
+        }
+        const updated = report.fixes.filter((f) => f.status === "updated").length;
+        console.log(
+          report.dryRun
+            ? `${updated} of ${report.fixes.length} entry(ies) would be updated.`
+            : `${updated} of ${report.fixes.length} entry(ies) updated.`
+        );
         break;
       }
       case "help":
