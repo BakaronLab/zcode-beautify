@@ -32,7 +32,27 @@ ZCode 是 Electron 应用,UI 主题由 Tailwind v4 的 `--color-*` CSS 自定义
 - Node.js ≥ 20(在 PATH 中)。
 - ZCode 桌面客户端(Windows / macOS / Linux)。
 
-## 安装
+## 两种包，都可以直接把链接扔给 AI 安装
+
+只需把 <https://github.com/Logocceai/zcode-beautify> 交给你的 AI 智能体——它会 clone 仓库并按其中的说明执行。选对包：
+
+| | **插件包**（`INSTALL-FOR-AI.md`） | **技能包**（`skill-pack/SKILL.md`） |
+|---|---|---|
+| 目标 | **ZCode 桌面客户端** | **任意** Electron 应用 |
+| AI 角色 | 安装器——装好现成插件 | 开发者——从零构建工具 |
+| 你说 | "给我的 ZCode 装这个美化插件" | "给我的 XX 应用做壁纸/取色美化" |
+| 产物 | ZCode 里可用的 /beautify 命令 + MCP 工具 | 一个新的本地美化工具 |
+
+插件包复制即用的提示词：
+
+```text
+https://github.com/Logocceai/zcode-beautify
+把这个美化插件安装到我的 ZCode 桌面客户端，按仓库中的 INSTALL-FOR-AI.md 执行。
+```
+
+离线环境？两种包都在 [Releases 页面](https://github.com/Logocceai/zcode-beautify/releases) 附有 zip。
+
+## 安装（手动路径）
 
 ### 方式 A —— ZCode 插件市场(推荐)
 

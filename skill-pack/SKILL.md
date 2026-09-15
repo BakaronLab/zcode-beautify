@@ -15,6 +15,25 @@ Chrome DevTools Protocol (CDP), and inject a self-contained bootstrap script.
 deps, a few hundred lines), not a plugin. Do not install anything into the target
 app. Everything is injected at runtime.
 
+## First: is this the right package?
+
+This repository ships **two different things**. Do not confuse them:
+
+| | **Plugin package** (`INSTALL-FOR-AI.md`) | **Skill pack** (you are here) |
+|---|---|---|
+| Target | The user's **ZCode desktop client** | **Any** Electron app |
+| Your role | **Installer** — set up a ready-made plugin | **Developer** — build the tool yourself |
+| User says | "Install this beautify plugin in my ZCode" | "Build wallpaper/color beautification for my XX app" |
+| Result | Working `/beautify` command + MCP tools in ZCode | A new local tool the user runs themselves |
+
+If the user only wants their **ZCode** beautified with zero development →
+install the plugin instead: read `INSTALL-FOR-AI.md` at the repository root
+(<https://github.com/Logocceai/zcode-beautify>). Otherwise continue below.
+
+**If the user just handed you the repository link** for this skill: clone it
+(`git clone https://github.com/Logocceai/zcode-beautify.git`), work inside
+`skill-pack/` (this file and `references/`), and follow the workflow.
+
 ## Prerequisites
 
 - Node.js ≥ 20 (global `fetch` + `WebSocket`; on Node < 22 install `ws` and swap the WebSocket constructor).

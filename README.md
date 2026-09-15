@@ -32,7 +32,30 @@ It never modifies ZCode's installation files, so ZCode upgrades are unaffected.
 - Node.js ≥ 20 available on your PATH.
 - ZCode desktop client (Windows / macOS / Linux).
 
-## Install
+## Two packages, both installable by handing an AI the link
+
+Give your AI agent just <https://github.com/Logocceai/zcode-beautify> — it
+clones the repo and follows the instructions inside. Pick the right one:
+
+| | **Plugin package** (`INSTALL-FOR-AI.md`) | **Skill pack** (`skill-pack/SKILL.md`) |
+|---|---|---|
+| Target | The **ZCode desktop client** | **Any** Electron app |
+| AI's role | Installer — sets up the ready-made plugin | Developer — builds the tool from scratch |
+| You say | "Install this beautify plugin in my ZCode" | "Build wallpaper/color beautification for my XX app" |
+| Result | Working `/beautify` command + MCP tools | A new local beautify tool |
+
+Copy-paste prompt for the plugin:
+
+```text
+https://github.com/Logocceai/zcode-beautify
+Install this beautify plugin into my ZCode desktop client. Follow
+INSTALL-FOR-AI.md in the repository.
+```
+
+Offline? Both packages are attached to the
+[releases page](https://github.com/Logocceai/zcode-beautify/releases) as zips.
+
+## Install (manual paths)
 
 ### Option A — ZCode plugin marketplace (recommended)
 

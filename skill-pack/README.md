@@ -4,10 +4,17 @@ A self-contained skill for AI coding agents: beautify **any Electron desktop
 app** with a wallpaper layer and Material Design 3 (Monet) dynamic color over
 the Chrome DevTools Protocol — no plugin system, no app modifications.
 
-**Give this folder to your AI** (Claude, DeepSeek, Codex, Doubao, …) and ask it
-to follow `SKILL.md`. The agent will build a small local beautify tool for your
-app: launch the app with a debug port, inject a wallpaper + token CSS, keep the
-theme alive across reloads, and optionally serve a live-tuning API.
+**Hand this folder — or just the repository link
+<https://github.com/Logocceai/zcode-beautify> — to your AI** (Claude, DeepSeek,
+Codex, Doubao, …) and ask it to follow `SKILL.md`.
+
+> **Two packages live in this repo — pick the right one:**
+>
+> | | **Plugin package** (`INSTALL-FOR-AI.md`) | **Skill pack** (here) |
+> |---|---|---|
+> | Target | ZCode desktop client only | Any Electron app |
+> | AI's role | Install the ready-made plugin | Build the tool from scratch |
+> | Pick this when | "Just make my ZCode pretty" | "Beautify my XX app" / other AI platform |
 
 ## Contents
 
