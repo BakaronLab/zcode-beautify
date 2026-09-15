@@ -151,7 +151,7 @@ npm run bundle   # 预构建单文件产物(仓库随附)
 ## 风险与限制
 
 - 注入通过 CDP(Chrome DevTools 协议)实现,属**非官方**手段,ZCode 更新可能使其失效;`reset` 可随时还原默认外观。
-- `launch` 需要重启一次 ZCode。若 `serve`/`watch` 未运行,每次 ZCode 重启主题都会丢失(CDP 会话随连接关闭)。
+- `launch` 需要重启一次 ZCode。若 `serve`/`watch` 未运行,每次 ZCode 重启主题都会丢失(CDP 会话随连接关闭)。一劳永逸:在 ZCode 快捷方式的目标末尾追加 ` --remote-debugging-port=9222`,之后只要 `serve` 在运行,重启也会自动恢复。
 - 功能色(success/warning/destructive)刻意保持不动。
 - 控制 API 仅绑定 `127.0.0.1`,但按设计接受本机任意进程访问(注入面板需要 CORS)。
 

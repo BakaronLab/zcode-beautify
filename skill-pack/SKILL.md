@@ -192,6 +192,7 @@ inline styles, and debounce-POSTs (~300 ms) to the API. Cache the decoded image
 8. **PowerShell `<`** — `apply < "C:\path"` is a parse error; always quote paths as plain arguments.
 9. **Big images** — downscale to ≤ 2560px long side before extracting colors and embedding (speed + memory).
 10. **data URI MIME** — re-encode to JPEG q≈82 regardless of source format; PNG screenshots can be 10× larger.
+11. **The user WILL restart the app** — CDP injection is session-scoped, so without a kept-alive tool the theme vanishes on restart and users report "it stopped working". Persist the fix into the app's shortcuts: append `--remote-debugging-port=<port>` to the target's arguments (Windows: edit the `.lnk` `Arguments` via WScript.Shell; the all-users Start Menu copy needs elevation, a Desktop shortcut does not). Pair with `serve`/watch so re-injection is automatic.
 
 ## Deliverable
 

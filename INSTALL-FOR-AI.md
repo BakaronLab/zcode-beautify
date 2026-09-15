@@ -134,10 +134,24 @@ everything else.
    run `node <plugin-dir>/dist/cli.js launch` (the plugin dir is the cache
    folder above; requires Node.js ≥ 20). Alternatively suggest editing the
    ZCode shortcut to append the flag.
-3. Then: `/beautify <path-to-an-image>` or `node <plugin-dir>/dist/cli.js apply
+3. **Make CDP survive restarts — do not skip this.** The injected theme lives
+   in CDP sessions: the moment the user restarts ZCode without the debug port,
+   beautification is gone and they will report "the plugin stopped working".
+   Fix it at the source by persisting the flag into the app's shortcuts:
+   - Locate the app's shortcuts (Desktop, `Start Menu\Programs` for the user
+     and, if present, the all-users one under `C:\ProgramData\...`) and append
+     ` --remote-debugging-port=9222` to the target's arguments
+     (WScript.Shell on Windows: read the `.lnk`, set `Arguments`, `Save()`).
+     The all-users Start Menu needs elevation — a user-level shortcut on the
+     Desktop covers the common case without admin rights.
+   - Warn the user: one full restart of ZCode with the flag is still required
+     once (quit completely, start via the updated shortcut).
+4. Then: `/beautify <path-to-an-image>` or `node <plugin-dir>/dist/cli.js apply
    "image.jpg" --blur 6 --dim 30 --fit smart`, and
-   `node <plugin-dir>/dist/cli.js serve` for the live settings panel.
-4. Verify: CDP reachable (`node <plugin-dir>/dist/cli.js status`), wallpaper
+   `node <plugin-dir>/dist/cli.js serve` for the live settings panel. Keep
+   `serve` running (or the `watch` mode) so the theme is re-injected after
+   every app restart.
+5. Verify: CDP reachable (`node <plugin-dir>/dist/cli.js status`), wallpaper
    visible, `/beautify` available in a new conversation.
 
 ## Uninstall (if the user asks)

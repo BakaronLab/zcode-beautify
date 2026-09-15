@@ -163,7 +163,7 @@ zip, or read [`skill-pack/SKILL.md`](skill-pack/SKILL.md) directly.
 ## Risks & limitations
 
 - Injection happens over CDP — an **unofficial** mechanism. Updates to ZCode may break it; `reset` always restores the default look.
-- `launch` restarts ZCode once. Without `serve`/`watch` running, the theme is lost on every ZCode restart (CDP sessions are scoped to the connection).
+- `launch` restarts ZCode once. Without `serve`/`watch` running, the theme is lost on every ZCode restart (CDP sessions are scoped to the connection). To make it permanent, add ` --remote-debugging-port=9222` to your ZCode shortcut's target — the theme then survives every restart as long as `serve` runs.
 - Functional colors (success/warning/destructive) are intentionally left untouched.
 - The control API binds to `127.0.0.1` only and accepts requests from any local process by design (the injected panel needs CORS).
 
