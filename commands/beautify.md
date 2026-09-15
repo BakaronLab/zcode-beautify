@@ -24,7 +24,10 @@ The user wants to beautify the ZCode desktop client. $ARGUMENTS
    (`blur` / `dim` / `monet` / `wallpaper_visible`) when the user asks to adjust
    the look — no need to re-send the image.
 6. **Report the result** and mention:
-   - `node <plugin-root>/dist/cli.js serve` keeps a draggable settings panel
-     inside ZCode for live tuning (blur/dim sliders, Monet toggle, wallpaper
-     swap, reset);
+   - `node <plugin-root>/dist/cli.js serve --detach` keeps a draggable settings
+     panel inside ZCode for live tuning (blur/dim sliders, Monet toggle,
+     wallpaper swap, reset). Always pass `--detach`: a foreground `serve` dies
+     with the shell that started it, and the panel then reports itself offline.
+     Do not start a second `serve` — the CLI refuses a duplicate and names the
+     pid that already owns the port;
    - `reset_appearance` restores the default look.

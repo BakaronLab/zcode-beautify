@@ -148,9 +148,12 @@ everything else.
      once (quit completely, start via the updated shortcut).
 4. Then: `/beautify <path-to-an-image>` or `node <plugin-dir>/dist/cli.js apply
    "image.jpg" --blur 6 --dim 30 --fit smart`, and
-   `node <plugin-dir>/dist/cli.js serve` for the live settings panel. Keep
-   `serve` running (or the `watch` mode) so the theme is re-injected after
-   every app restart.
+   `node <plugin-dir>/dist/cli.js serve --detach` for the live settings panel.
+   Always pass `--detach`: it backgrounds the service so the panel keeps working
+   after the shell (or the agent session) that started it goes away. A
+   foreground `serve` is reaped with its parent, and the panel then reports
+   itself offline. Start it once — a second `serve` refuses to start and prints
+   the pid that already owns the port.
 5. Verify: CDP reachable (`node <plugin-dir>/dist/cli.js status`), wallpaper
    visible, `/beautify` available in a new conversation.
 

@@ -6027,7 +6027,7 @@ var require_gifframe = __commonJS({
 var require_gifutil = __commonJS({
   "node_modules/gifwrap/src/gifutil.js"(exports) {
     "use strict";
-    var fs6 = __require("fs");
+    var fs7 = __require("fs");
     var ImageQ = require_image_q();
     var BitmapImage2 = require_bitmapimage();
     var { GifFrame: GifFrame2 } = require_gifframe();
@@ -6142,14 +6142,14 @@ var require_gifutil = __commonJS({
       jimpImage.bitmap.data = bitmapImageToShare.bitmap.data;
       return jimpImage;
     };
-    exports.write = function(path4, frames, spec, encoder) {
+    exports.write = function(path5, frames, spec, encoder) {
       encoder = encoder || defaultCodec;
-      const matches = path4.match(/\.[a-zA-Z]+$/);
+      const matches = path5.match(/\.[a-zA-Z]+$/);
       if (matches !== null && INVALID_SUFFIXES.includes(matches[0].toLowerCase())) {
-        throw new Error(`GIF '${path4}' has an unexpected suffix`);
+        throw new Error(`GIF '${path5}' has an unexpected suffix`);
       }
       return encoder.encodeGif(frames, spec).then((gif2) => {
-        return _writeBinary(path4, gif2.buffer).then(() => {
+        return _writeBinary(path5, gif2.buffer).then(() => {
           return gif2;
         });
       });
@@ -6221,9 +6221,9 @@ var require_gifutil = __commonJS({
         }
       }
     }
-    function _readBinary(path4) {
+    function _readBinary(path5) {
       return new Promise((resolve, reject) => {
-        fs6.readFile(path4, (err, buffer) => {
+        fs7.readFile(path5, (err, buffer) => {
           if (err) {
             return reject(err);
           }
@@ -6231,9 +6231,9 @@ var require_gifutil = __commonJS({
         });
       });
     }
-    function _writeBinary(path4, buffer) {
+    function _writeBinary(path5, buffer) {
       return new Promise((resolve, reject) => {
-        fs6.writeFile(path4, buffer, (err) => {
+        fs7.writeFile(path5, buffer, (err) => {
           if (err) {
             return reject(err);
           }
@@ -8244,9 +8244,9 @@ var require_decoder = __commonJS({
         return a2 < 0 ? 0 : a2 > 255 ? 255 : a2;
       }
       constructor.prototype = {
-        load: function load(path4) {
+        load: function load(path5) {
           var xhr = new XMLHttpRequest();
-          xhr.open("GET", path4, true);
+          xhr.open("GET", path5, true);
           xhr.responseType = "arraybuffer";
           xhr.onload = (function() {
             var data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
@@ -19149,8 +19149,8 @@ var init_parseUtil = __esm({
     init_errors();
     init_en();
     makeIssue = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -19458,11 +19458,11 @@ var init_types2 = __esm({
     init_parseUtil();
     init_util();
     ParseInputLazyPath = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -23275,8 +23275,8 @@ var init_parseUtil2 = __esm({
     init_errors2();
     init_en2();
     makeIssue2 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -23584,11 +23584,11 @@ var init_types3 = __esm({
     init_parseUtil2();
     init_util2();
     ParseInputLazyPath2 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -28186,8 +28186,8 @@ var init_parseUtil3 = __esm({
     init_errors3();
     init_en3();
     makeIssue3 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -28495,11 +28495,11 @@ var init_types4 = __esm({
     init_parseUtil3();
     init_util3();
     ParseInputLazyPath3 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -32340,8 +32340,8 @@ var init_parseUtil4 = __esm({
     init_errors4();
     init_en4();
     makeIssue4 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -32649,11 +32649,11 @@ var init_types5 = __esm({
     init_parseUtil4();
     init_util4();
     ParseInputLazyPath4 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -36776,11 +36776,11 @@ var require_Mime = __commonJS({
         }
       }
     };
-    Mime.prototype.getType = function(path4) {
-      path4 = String(path4);
-      let last = path4.replace(/^.*[/\\]/, "").toLowerCase();
+    Mime.prototype.getType = function(path5) {
+      path5 = String(path5);
+      let last = path5.replace(/^.*[/\\]/, "").toLowerCase();
       let ext = last.replace(/^.*\./, "").toLowerCase();
-      let hasPath = last.length < path4.length;
+      let hasPath = last.length < path5.length;
       let hasDot = ext.length < last.length - 1;
       return (hasDot || !hasPath) && this._types[ext] || null;
     };
@@ -43318,8 +43318,8 @@ function isTokenizerStreamBoundsError(error) {
   }
   return /strtok3[/\\]lib[/\\]stream[/\\]/.test(error.stack);
 }
-async function fileTypeFromFile(path4, options) {
-  return new FileTypeParser2(options).fromFile(path4, options);
+async function fileTypeFromFile(path5, options) {
+  return new FileTypeParser2(options).fromFile(path5, options);
 }
 async function fileTypeFromStream(stream, options) {
   return new FileTypeParser2(options).fromStream(stream);
@@ -43350,9 +43350,9 @@ var init_file_type = __esm({
           }
         }
       }
-      async fromFile(path4) {
+      async fromFile(path5) {
         this.options.signal?.throwIfAborted();
-        const fileHandle = await fs2.open(path4, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
+        const fileHandle = await fs2.open(path5, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
         const fileStat = await fileHandle.stat();
         if (!fileStat.isFile()) {
           await fileHandle.close();
@@ -43361,7 +43361,7 @@ var init_file_type = __esm({
         const tokenizer = new FileTokenizer(fileHandle, {
           ...this.getTokenizerOptions(),
           fileInfo: {
-            path: path4,
+            path: path5,
             size: fileStat.size
           }
         });
@@ -43696,9 +43696,9 @@ function createJimp({ plugins: pluginsArg, formats: formatsArg } = {}) {
      * await image.write("test/output.png");
      * ```
      */
-    async write(path4, options) {
-      const mimeType = import_lite.default.getType(path4);
-      await writeFile(path4, await this.getBuffer(mimeType, options));
+    async write(path5, options) {
+      const mimeType = import_lite.default.getType(path5);
+      await writeFile(path5, await this.getBuffer(mimeType, options));
     }
     /**
      * Clone the image into a new Jimp instance.
@@ -44347,8 +44347,8 @@ var init_parseUtil5 = __esm({
     init_errors5();
     init_en5();
     makeIssue5 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -44656,11 +44656,11 @@ var init_types6 = __esm({
     init_parseUtil5();
     init_util6();
     ParseInputLazyPath5 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -49105,8 +49105,8 @@ var init_parseUtil6 = __esm({
     init_errors6();
     init_en6();
     makeIssue6 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -49414,11 +49414,11 @@ var init_types7 = __esm({
     init_parseUtil6();
     init_util7();
     ParseInputLazyPath6 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -53272,8 +53272,8 @@ var init_parseUtil7 = __esm({
     init_errors7();
     init_en7();
     makeIssue7 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -53581,11 +53581,11 @@ var init_types8 = __esm({
     init_parseUtil7();
     init_util8();
     ParseInputLazyPath7 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -57566,8 +57566,8 @@ var init_parseUtil8 = __esm({
     init_errors8();
     init_en8();
     makeIssue8 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -57875,11 +57875,11 @@ var init_types9 = __esm({
     init_parseUtil8();
     init_util9();
     ParseInputLazyPath8 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -61728,8 +61728,8 @@ var init_parseUtil9 = __esm({
     init_errors9();
     init_en9();
     makeIssue9 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -62037,11 +62037,11 @@ var init_types10 = __esm({
     init_parseUtil9();
     init_util10();
     ParseInputLazyPath9 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -65927,8 +65927,8 @@ var init_parseUtil10 = __esm({
     init_errors10();
     init_en10();
     makeIssue10 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -66236,11 +66236,11 @@ var init_types11 = __esm({
     init_parseUtil10();
     init_util11();
     ParseInputLazyPath10 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -70078,8 +70078,8 @@ var init_parseUtil11 = __esm({
     init_errors11();
     init_en11();
     makeIssue11 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -70387,11 +70387,11 @@ var init_types12 = __esm({
     init_parseUtil11();
     init_util12();
     ParseInputLazyPath11 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -74464,8 +74464,8 @@ var init_parseUtil12 = __esm({
     init_errors12();
     init_en12();
     makeIssue12 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -74773,11 +74773,11 @@ var init_types13 = __esm({
     init_parseUtil12();
     init_util13();
     ParseInputLazyPath12 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -78634,8 +78634,8 @@ var init_parseUtil13 = __esm({
     init_errors13();
     init_en13();
     makeIssue13 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -78943,11 +78943,11 @@ var init_types14 = __esm({
     init_parseUtil13();
     init_util14();
     ParseInputLazyPath13 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -82961,8 +82961,8 @@ var init_parseUtil14 = __esm({
     init_errors14();
     init_en14();
     makeIssue14 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -83270,11 +83270,11 @@ var init_types16 = __esm({
     init_parseUtil14();
     init_util15();
     ParseInputLazyPath14 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -87238,8 +87238,8 @@ var init_parseUtil15 = __esm({
     init_errors15();
     init_en15();
     makeIssue15 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -87547,11 +87547,11 @@ var init_types17 = __esm({
     init_parseUtil15();
     init_util16();
     ParseInputLazyPath15 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -94288,8 +94288,8 @@ var init_parseUtil16 = __esm({
     init_errors16();
     init_en16();
     makeIssue16 = (params) => {
-      const { data, path: path4, errorMaps, issueData } = params;
-      const fullPath = [...path4, ...issueData.path || []];
+      const { data, path: path5, errorMaps, issueData } = params;
+      const fullPath = [...path5, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -94597,11 +94597,11 @@ var init_types18 = __esm({
     init_parseUtil16();
     init_util17();
     ParseInputLazyPath16 = class {
-      constructor(parent, value, path4, key) {
+      constructor(parent, value, path5, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path4;
+        this._path = path5;
         this._key = key;
       }
       get path() {
@@ -110091,7 +110091,19 @@ function buildPanelScript(apiPort) {
     '.zb-btn { display: inline-block; padding: 6px 20px; text-align: center; border-radius: 999px; cursor: pointer;',
       ' background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); color: inherit; font-size: 12px; }',
     '.zb-btn:hover { background: rgba(255,255,255,.16); }',
-    '#zb-status { min-height: 14px; padding: 2px 12px 0; opacity: .6; font-size: 11px; }'
+    '#zb-status { min-height: 14px; padding: 2px 12px 0; opacity: .6; font-size: 11px; }',
+    '#zb-offline { display: flex; flex-direction: column; gap: 6px; align-items: center;',
+      ' padding: 10px 12px; background: rgba(120,53,15,.55); font-size: 11px; line-height: 1.5; text-align: center; }',
+    '#zb-offline[hidden] { display: none; }',
+    '#zb-offline code { background: rgba(0,0,0,.35); padding: 1px 4px; border-radius: 4px;',
+      ' font-size: 10px; user-select: text; }',
+    '#zb-offline .zb-hint { opacity: .85; }',
+    // While offline the controls hold nothing we could read, so they must not
+    // look interactive \u2014 a slider parked mid-track next to a "0px" label reads
+    // as a real (wrong) setting.
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-body { opacity: .45; pointer-events: none; }',
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-status { display: none; }',
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-fab { border-color: rgba(248,113,113,.7); }'
   ].join('');
 
   var style = document.createElement('style');
@@ -110105,17 +110117,22 @@ function buildPanelScript(apiPort) {
     '<div id="zb-fab" title="ZCode Beautify">\u{1F3A8}</div>' +
     '<div id="zb-panel" hidden>' +
     '  <div id="zb-head"><span>ZCode Beautify</span><span id="zb-close">\u2715</span></div>' +
+    '  <div id="zb-offline" hidden>' +
+    '    <div>\u26A0 \u7F8E\u5316\u670D\u52A1\u672A\u8FD0\u884C,\u9762\u677F\u4E0D\u53EF\u7528</div>' +
+    '    <div class="zb-hint">\u5728\u63D2\u4EF6\u76EE\u5F55\u6267\u884C <code>node dist/cli.js serve --detach</code> \u542F\u52A8</div>' +
+    '    <button class="zb-btn" id="zb-retry">\u91CD\u8BD5\u8FDE\u63A5</button>' +
+    '  </div>' +
     '  <div id="zb-body">' +
     '    <div class="zb-row"><label title="\u80CC\u666F\u6A21\u7CCA\u7A0B\u5EA6(\u50CF\u7D20)"><span>\u80CC\u666F\u6A21\u7CCA</span><span><span id="zb-blur-val">0</span>px</span></label>' +
-    '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
+    '      <input type="range" id="zb-blur" min="0" max="30" step="1" value="0"></div>' +
     '    <div class="zb-row"><label title="\u80CC\u666F\u538B\u6697\u7A0B\u5EA6(\u767E\u5206\u6BD4,\u8D8A\u9AD8\u8D8A\u6697)"><span>\u80CC\u666F\u538B\u6697</span><span><span id="zb-dim-val">0</span>%</span></label>' +
-    '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
+    '      <input type="range" id="zb-dim" min="0" max="80" step="1" value="0"></div>' +
     '    <div class="zb-row zb-toggles">' +
     '      <label title="\u6839\u636E\u58C1\u7EB8\u81EA\u52A8\u751F\u6210 UI \u914D\u8272;\u5173\u95ED\u5219\u4FDD\u7559 ZCode \u539F\u751F\u989C\u8272"><input type="checkbox" id="zb-monet">UI \u83AB\u5948\u53D6\u8272</label>' +
     '      <label title="\u663E\u793A\u6216\u9690\u85CF\u80CC\u666F\u58C1\u7EB8"><input type="checkbox" id="zb-vis">\u663E\u793A\u58C1\u7EB8</label>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <button class="zb-btn" id="zb-fit" title="\u80CC\u666F\u586B\u5145\u65B9\u5F0F:\u586B\u6EE1\u88C1\u526A\u94FA\u6EE1\u7A97\u53E3 / \u5B8C\u6574\u663E\u793A\u4E0D\u88C1\u526A(\u6A21\u7CCA\u57AB\u5E95)/ \u667A\u80FD\u9002\u914D\u81EA\u52A8\u5206\u6790\u753B\u9762\u4E3B\u4F53"></button>' +
+    '      <button class="zb-btn" id="zb-fit" title="\u80CC\u666F\u586B\u5145\u65B9\u5F0F:\u586B\u6EE1\u88C1\u526A\u94FA\u6EE1\u7A97\u53E3 / \u5B8C\u6574\u663E\u793A\u4E0D\u88C1\u526A(\u6A21\u7CCA\u57AB\u5E95)/ \u667A\u80FD\u9002\u914D\u81EA\u52A8\u5206\u6790\u753B\u9762\u4E3B\u4F53">\u80CC\u666F\u586B\u5145: \u2026</button>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
     '      <label class="zb-btn" for="zb-file" title="\u9009\u62E9\u4E00\u5F20\u56FE\u7247\u4F5C\u4E3A\u80CC\u666F\u58C1\u7EB8,UI \u914D\u8272\u968F\u4E4B\u66F4\u65B0">\u66F4\u6362\u56FE\u7247\u2026</label>' +
@@ -110165,10 +110182,42 @@ function buildPanelScript(apiPort) {
     }, 300);
   }
 
+  // The control service lives in a separate process that can stop or die. When
+  // it is unreachable the panel must say so instead of rendering values it
+  // never read, and it must recover on its own once the service is back.
+  var beatTimer = null;
+  function panelOpen() { return !$('zb-panel').hidden; }
+  /** Re-check the service: while the panel is open, and always while offline. */
+  function beat(on) {
+    if (on && !beatTimer) beatTimer = setInterval(refresh, 4000);
+    if (!on && beatTimer) { clearInterval(beatTimer); beatTimer = null; }
+  }
+
+  function setOffline(on) {
+    root.setAttribute('data-offline', on ? '1' : '0');
+    $('zb-offline').hidden = !on;
+    $('zb-retry').textContent = '\u91CD\u8BD5\u8FDE\u63A5';
+    $('zb-fab').title = on ? 'ZCode Beautify \u2014 \u7F8E\u5316\u670D\u52A1\u672A\u8FD0\u884C' : 'ZCode Beautify';
+    if (on) {
+      $('zb-blur').value = 0; $('zb-blur-val').textContent = '0';
+      $('zb-dim').value = 0; $('zb-dim-val').textContent = '0';
+      $('zb-monet').checked = false;
+      $('zb-vis').checked = false;
+      $('zb-fit').textContent = '\u80CC\u666F\u586B\u5145: \u672A\u77E5';
+      $('zb-fit').removeAttribute('data-fit');
+      $('zb-reset').textContent = '\u8FD8\u539F\u9ED8\u8BA4\u5916\u89C2';
+      $('zb-reset').setAttribute('data-mode', 'reset');
+      beat(true);
+    } else {
+      if (!panelOpen()) beat(false);
+    }
+  }
+
   function refresh() {
     fetch(API + '/api/config')
       .then(function (r) { return r.json(); })
       .then(function (c) {
+        setOffline(false);
         $('zb-blur').value = c.blur; $('zb-blur-val').textContent = c.blur;
         $('zb-dim').value = c.dim; $('zb-dim-val').textContent = c.dim;
         $('zb-monet').checked = !!c.monet;
@@ -110189,7 +110238,7 @@ function buildPanelScript(apiPort) {
           resetBtn.title = '\u5F53\u524D\u5DF2\u662F\u9ED8\u8BA4\u5916\u89C2';
         }
       })
-      .catch(function () { status('\u65E0\u6CD5\u8FDE\u63A5\u7F8E\u5316\u670D\u52A1 service unreachable'); });
+      .catch(function () { setOffline(true); });
   }
 
   $('zb-blur').addEventListener('input', function () {
@@ -110239,12 +110288,25 @@ function buildPanelScript(apiPort) {
     });
   });
 
+  $('zb-retry').addEventListener('click', function () {
+    this.textContent = '\u6B63\u5728\u91CD\u8BD5\u2026';
+    refresh();
+  });
+
   $('zb-fab').addEventListener('click', function () {
     var p = $('zb-panel');
     p.hidden = !p.hidden;
-    if (!p.hidden) refresh();
+    if (!p.hidden) {
+      refresh();
+      beat(true);
+    } else if (root.getAttribute('data-offline') !== '1') {
+      beat(false);
+    }
   });
-  $('zb-close').addEventListener('click', function () { $('zb-panel').hidden = true; });
+  $('zb-close').addEventListener('click', function () {
+    $('zb-panel').hidden = true;
+    if (root.getAttribute('data-offline') !== '1') beat(false);
+  });
 
   // Fill in the fit label (and control values) right away, not just on open.
   refresh();
@@ -110301,6 +110363,7 @@ var init_panelScript = __esm({
 // dist/core/server.js
 var server_exports = {};
 __export(server_exports, {
+  existingServePid: () => existingServePid,
   startServe: () => startServe
 });
 import http from "node:http";
@@ -110427,13 +110490,27 @@ async function poll(config, apiPort) {
   }
 }
 function sendJson(res, code, body) {
-  res.writeHead(code, {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  });
-  res.end(JSON.stringify(body));
+  try {
+    res.writeHead(code, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
+    });
+    res.end(JSON.stringify(body));
+  } catch {
+  }
+}
+async function existingServePid(apiPort) {
+  try {
+    const res = await fetch(`http://127.0.0.1:${apiPort}/api/health`, {
+      signal: AbortSignal.timeout(1e3)
+    });
+    const body = await res.json();
+    return body?.service === "zcode-beautify" ? body.pid : void 0;
+  } catch {
+    return void 0;
+  }
 }
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -110454,7 +110531,24 @@ function readBody(req) {
 }
 async function startServe(opts) {
   const { cdpPort, apiPort } = opts;
-  const server = http.createServer(async (req, res) => {
+  const runtimeConfig = () => ({ ...currentConfig(), port: cdpPort });
+  const persisted = (config) => ({
+    ...config,
+    port: currentConfig().port
+  });
+  const already = await existingServePid(apiPort);
+  if (already !== void 0) {
+    throw new Error(`a beautify service is already running on http://127.0.0.1:${apiPort} (pid ${already}) \u2014 open its panel, or stop that process first`);
+  }
+  const server = http.createServer((req, res) => {
+    handleRequest(req, res).catch(() => {
+      try {
+        res.destroy();
+      } catch {
+      }
+    });
+  });
+  async function handleRequest(req, res) {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     try {
       if (req.method === "OPTIONS") {
@@ -110462,13 +110556,13 @@ async function startServe(opts) {
         return;
       }
       if (req.method === "GET" && url.pathname === "/api/config") {
-        sendJson(res, 200, publicConfig(currentConfig()));
+        sendJson(res, 200, publicConfig(runtimeConfig()));
         return;
       }
       if (req.method === "POST" && url.pathname === "/api/config") {
         const patch = sanitize(JSON.parse(await readBody(req)));
-        const config = { ...currentConfig(), ...patch };
-        saveConfig(config);
+        const config = { ...runtimeConfig(), ...patch };
+        saveConfig(persisted(config));
         const windows = await pushConfigToSessions(config).catch(() => 0);
         sendJson(res, 200, { ok: true, windows, ...publicConfig(config) });
         return;
@@ -110483,12 +110577,12 @@ async function startServe(opts) {
         if (bytes.length > MAX_WALLPAPER_BYTES) {
           throw new Error(`image too large (max ${MAX_WALLPAPER_BYTES / 1024 / 1024} MB)`);
         }
-        const config = currentConfig();
+        const config = runtimeConfig();
         fs5.mkdirSync(dataDir(), { recursive: true });
         const dest = path3.join(dataDir(), "wallpaper" + IMAGE_EXT[m[1]]);
         fs5.writeFileSync(dest, bytes);
         cachedAssets = { file: dest, mtimeMs: fs5.statSync(dest).mtimeMs, assets: await loadWallpaper(dest) };
-        saveConfig({ ...config, wallpaperPath: dest });
+        saveConfig(persisted({ ...config, wallpaperPath: dest }));
         const windows = await pushConfigToSessions({ ...config, wallpaperPath: dest }).catch(() => 0);
         sendJson(res, 200, { ok: true, windows, ...publicConfig({ ...config, wallpaperPath: dest }) });
         return;
@@ -110531,24 +110625,27 @@ async function startServe(opts) {
         return;
       }
       if (req.method === "GET" && url.pathname === "/api/health") {
-        sendJson(res, 200, { ok: true });
+        sendJson(res, 200, { ok: true, service: "zcode-beautify", pid: process.pid });
         return;
       }
       sendJson(res, 404, { error: "not found" });
     } catch (err) {
       sendJson(res, 400, { error: err.message });
     }
-  });
+  }
   await new Promise((resolve, reject) => {
     server.once("error", reject);
     server.listen(apiPort, "127.0.0.1", resolve);
   });
+  server.on("error", (err) => {
+    console.error(`serve: http server error \u2014 ${err.message}`);
+  });
   console.log(`serve: control API on http://127.0.0.1:${apiPort} \u2014 Ctrl+C to stop`);
   console.log(`serve: injecting into ZCode renderers on CDP port ${cdpPort}`);
-  await poll(currentConfig(), apiPort);
+  await poll(runtimeConfig(), apiPort);
   for (; ; ) {
     await new Promise((r2) => setTimeout(r2, POLL_MS));
-    await poll(currentConfig(), apiPort);
+    await poll(runtimeConfig(), apiPort);
   }
 }
 var MAX_WALLPAPER_BYTES, MAX_BODY_BYTES, POLL_MS, cachedAssets, held, IMAGE_EXT;
@@ -110578,6 +110675,8 @@ var init_server = __esm({
 init_inject();
 init_launch();
 init_session();
+import fs6 from "node:fs";
+import path4 from "node:path";
 var USAGE = `zcode-beautify <command> [options]
 
 Commands:
@@ -110592,7 +110691,9 @@ Commands:
   reset [--port N]               Remove wallpaper and color overrides
   status [--port N]              Show CDP reachability and renderer targets
   watch [--port N]               Watch mode: re-inject whenever ZCode (re)starts
-  serve [--port N] [--api-port M]  Watch mode + settings panel + local API (default API port 9223)
+  serve [--port N] [--api-port M] [--detach]
+                                 Watch mode + settings panel + local API (default API port 9223)
+                                 --detach runs it in the background, outliving this shell
 `;
 async function main() {
   const [cmd, ...rest] = process.argv.slice(2);
@@ -110663,8 +110764,12 @@ Quit ZCode completely (including any tray icon), then run \`zcode-beautify launc
         break;
       }
       case "serve": {
-        const { startServe: startServe2 } = await Promise.resolve().then(() => (init_server(), server_exports));
         const apiPort = Number(flag("--api-port") ?? 9223);
+        if (has("--detach")) {
+          await startServeDetached(port, apiPort);
+          break;
+        }
+        const { startServe: startServe2 } = await Promise.resolve().then(() => (init_server(), server_exports));
         await startServe2({ cdpPort: port, apiPort });
         break;
       }
@@ -110682,6 +110787,37 @@ Quit ZCode completely (including any tray icon), then run \`zcode-beautify launc
     console.error(`error: ${err.message}`);
     process.exitCode = 1;
   }
+}
+async function startServeDetached(cdpPort, apiPort) {
+  const { spawn: spawn2 } = await import("node:child_process");
+  const { existingServePid: existingServePid2 } = await Promise.resolve().then(() => (init_server(), server_exports));
+  const already = await existingServePid2(apiPort);
+  if (already !== void 0) {
+    throw new Error(`a beautify service is already running on http://127.0.0.1:${apiPort} (pid ${already}) \u2014 open its panel, or stop that process first`);
+  }
+  fs6.mkdirSync(dataDir(), { recursive: true });
+  const logFile = path4.join(dataDir(), "serve.log");
+  const out = fs6.openSync(logFile, "a");
+  const child = spawn2(process.execPath, [process.argv[1], "serve", "--port", String(cdpPort), "--api-port", String(apiPort)], { detached: true, stdio: ["ignore", out, out], windowsHide: true });
+  child.unref();
+  fs6.closeSync(out);
+  for (let i2 = 0; i2 < 20; i2++) {
+    await new Promise((r2) => setTimeout(r2, 500));
+    try {
+      const res = await fetch(`http://127.0.0.1:${apiPort}/api/health`, {
+        signal: AbortSignal.timeout(1e3)
+      });
+      const body = await res.json();
+      if (body?.service === "zcode-beautify") {
+        console.log(`Beautify service running on http://127.0.0.1:${apiPort} (pid ${body.pid}).`);
+        console.log(`Log: ${logFile}`);
+        return;
+      }
+    } catch {
+    }
+  }
+  console.error(`serve did not come up within 10s \u2014 see ${logFile}`);
+  process.exitCode = 1;
 }
 async function watch(port) {
   const { buildPayloadFromConfig: buildPayloadFromConfig2 } = await Promise.resolve().then(() => (init_session(), session_exports));

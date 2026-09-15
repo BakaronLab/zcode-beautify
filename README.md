@@ -82,11 +82,13 @@ node dist/cli.js launch
 # 2) Set a wallpaper with Monet adaptation
 node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
 
-# 3) (Recommended) Keep the theme alive + get the live settings panel
-node dist/cli.js serve
+# 3) (Recommended) Keep the theme alive + get the live settings panel.
+#    --detach backgrounds it, so the panel keeps working after this shell
+#    (or the agent session that started it) is gone.
+node dist/cli.js serve --detach
 ```
 
-With `serve` running, a 🎨 button appears in the bottom-right corner of ZCode. Open it to tune blur/dim live, cycle the framing mode (cover → contain → smart), toggle Monet colors or wallpaper translucency, swap the wallpaper image, or reset — everything previews instantly and is saved automatically.
+With `serve` running, a 🎨 button appears in the bottom-right corner of ZCode. Open it to tune blur/dim live, cycle the framing mode (cover → contain → smart), toggle Monet colors or wallpaper translucency, swap the wallpaper image, or reset — everything previews instantly and is saved automatically. If the service is not running, the panel shows an explicit ⚠ offline banner instead of a zeroed configuration.
 
 You can also just type `/beautify <image path>` in ZCode and let the agent do it, then say things like "make it blurrier" (handled by the `apply_options` MCP tool).
 
@@ -97,7 +99,7 @@ You can also just type `/beautify <image path>` in ZCode and let the agent do it
 | `launch [--port N]` | Start ZCode with `--remote-debugging-port` (quit ZCode first) |
 | `apply <image> [--blur] [--dim] [--fit] [--no-monet]` | Set wallpaper + adapt colors (`--fit cover\|contain\|smart`) |
 | `colors` | Re-apply the stored theme without changing the image |
-| `serve [--api-port M]` | Watch mode + settings panel + local control API (default API port 9223) |
+| `serve [--detach] [--api-port M]` | Watch mode + settings panel + local control API (default API port 9223); `--detach` survives the shell that started it |
 | `watch` | Headless watch mode: re-inject whenever ZCode restarts |
 | `reset` | Remove wallpaper and color overrides |
 | `status` | Show CDP reachability and renderer targets |
@@ -163,7 +165,7 @@ zip, or read [`skill-pack/SKILL.md`](skill-pack/SKILL.md) directly.
 ## Risks & limitations
 
 - Injection happens over CDP — an **unofficial** mechanism. Updates to ZCode may break it; `reset` always restores the default look.
-- `launch` restarts ZCode once. Without `serve`/`watch` running, the theme is lost on every ZCode restart (CDP sessions are scoped to the connection). To make it permanent, add ` --remote-debugging-port=9222` to your ZCode shortcut's target — the theme then survives every restart as long as `serve` runs.
+- `launch` restarts ZCode once. Without `serve`/`watch` running, the theme is lost on every ZCode restart (CDP sessions are scoped to the connection). To make it permanent, add ` --remote-debugging-port=9222` to your ZCode shortcut's target — the theme then survives every restart as long as `serve` runs. Start it with `serve --detach`: a foreground `serve` dies with the terminal (or agent session) that spawned it, and the panel then reports itself offline.
 - Functional colors (success/warning/destructive) are intentionally left untouched.
 - The control API binds to `127.0.0.1` only and accepts requests from any local process by design (the injected panel needs CORS).
 

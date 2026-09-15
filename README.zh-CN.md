@@ -80,10 +80,11 @@ node dist/cli.js launch
 node dist/cli.js apply "D:\pictures\wallpaper.jpg" --blur 6 --dim 30
 
 # 3) (推荐)守护模式 + 实时设置面板
-node dist/cli.js serve
+#    --detach 让服务转入后台,启动它的终端(或智能体会话)结束后面板依然可用
+node dist/cli.js serve --detach
 ```
 
-`serve` 运行时,ZCode 右下角出现 🎨 按钮。点开即可实时调 blur/dim、循环切换取景模式(cover → contain → smart)、开关 Monet 配色与壁纸透显、更换壁纸图片或一键还原——所有调整即时预览、自动保存。
+`serve` 运行时,ZCode 右下角出现 🎨 按钮。点开即可实时调 blur/dim、循环切换取景模式(cover → contain → smart)、开关 Monet 配色与壁纸透显、更换壁纸图片或一键还原——所有调整即时预览、自动保存。服务未运行时,面板会明确显示 ⚠ 离线提示,而不是装作配置全为 0。
 
 也可以直接在 ZCode 里输入 `/beautify <图片路径>` 让智能体操作,之后说"模糊调高一点"即可(由 `apply_options` MCP 工具处理)。
 
@@ -94,7 +95,7 @@ node dist/cli.js serve
 | `launch [--port N]` | 以调试端口启动 ZCode(需先完全退出) |
 | `apply <image> [--blur] [--dim] [--fit] [--no-monet]` | 设壁纸并适配配色(`--fit cover\|contain\|smart`) |
 | `colors` | 不换图,重新应用已存主题 |
-| `serve [--api-port M]` | 守护模式 + 设置面板 + 本地控制 API(默认 API 端口 9223) |
+| `serve [--detach] [--api-port M]` | 守护模式 + 设置面板 + 本地控制 API(默认 API 端口 9223);`--detach` 使其脱离启动它的终端存活 |
 | `watch` | 无面板守护模式:ZCode 重启后自动重注入 |
 | `reset` | 移除壁纸与配色覆盖 |
 | `status` | 查看 CDP 可达性与渲染器目标 |
@@ -151,7 +152,7 @@ npm run bundle   # 预构建单文件产物(仓库随附)
 ## 风险与限制
 
 - 注入通过 CDP(Chrome DevTools 协议)实现,属**非官方**手段,ZCode 更新可能使其失效;`reset` 可随时还原默认外观。
-- `launch` 需要重启一次 ZCode。若 `serve`/`watch` 未运行,每次 ZCode 重启主题都会丢失(CDP 会话随连接关闭)。一劳永逸:在 ZCode 快捷方式的目标末尾追加 ` --remote-debugging-port=9222`,之后只要 `serve` 在运行,重启也会自动恢复。
+- `launch` 需要重启一次 ZCode。若 `serve`/`watch` 未运行,每次 ZCode 重启主题都会丢失(CDP 会话随连接关闭)。一劳永逸:在 ZCode 快捷方式的目标末尾追加 ` --remote-debugging-port=9222`,之后只要 `serve` 在运行,重启也会自动恢复。请用 `serve --detach` 启动:前台 `serve` 会随启动它的终端(或智能体会话)一起退出,面板随即显示离线。
 - 功能色(success/warning/destructive)刻意保持不动。
 - 控制 API 仅绑定 `127.0.0.1`,但按设计接受本机任意进程访问(注入面板需要 CORS)。
 

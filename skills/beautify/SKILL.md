@@ -34,9 +34,15 @@ modifies ZCode's installation files.
 5. **After ZCode restarts**, the injected theme is gone until re-injected — use
    the `refresh_theme` tool or run watch mode.
 6. **To undo everything**, use `reset_appearance`.
-7. **Recommend `node <plugin-root>/dist/cli.js serve`** for an interactive
-   experience: it keeps the theme alive and shows a draggable settings panel
-   inside ZCode (blur/dim sliders, Monet toggle, wallpaper swap, reset).
+7. **Recommend `node <plugin-root>/dist/cli.js serve --detach`** for an
+   interactive experience: it keeps the theme alive and shows a draggable
+   settings panel inside ZCode (blur/dim sliders, Monet toggle, wallpaper swap,
+   reset). `--detach` matters — a foreground `serve` is reaped with the shell or
+   agent session that spawned it, and the panel then shows its ⚠ offline banner.
+   Never start a second `serve`: it refuses to start and names the pid holding
+   the port. If the panel reports itself offline, run `serve --detach` rather
+   than assuming the stored config is empty — an offline panel deliberately
+   zeroes its controls.
 
 ## Tools
 

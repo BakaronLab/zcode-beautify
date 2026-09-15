@@ -186,13 +186,32 @@ async function poll(config: BeautifyConfig, apiPort: number): Promise<void> {
 // --- HTTP API ----------------------------------------------------------------
 
 function sendJson(res: http.ServerResponse, code: number, body: unknown): void {
-  res.writeHead(code, {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  });
-  res.end(JSON.stringify(body));
+  // The client can vanish mid-request (panel closed, renderer reloaded); a
+  // write to a dead socket must not escape as a rejection.
+  try {
+    res.writeHead(code, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    });
+    res.end(JSON.stringify(body));
+  } catch {
+    /* response already finished or socket gone */
+  }
+}
+
+/** True when another `serve` of this plugin already owns the port. */
+export async function existingServePid(apiPort: number): Promise<number | undefined> {
+  try {
+    const res = await fetch(`http://127.0.0.1:${apiPort}/api/health`, {
+      signal: AbortSignal.timeout(1000),
+    });
+    const body = (await res.json()) as { service?: string; pid?: number };
+    return body?.service === "zcode-beautify" ? body.pid : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function readBody(req: http.IncomingMessage): Promise<string> {
@@ -224,7 +243,37 @@ const IMAGE_EXT: Record<string, string> = {
 export async function startServe(opts: ServeOptions): Promise<void> {
   const { cdpPort, apiPort } = opts;
 
-  const server = http.createServer(async (req, res) => {
+  // `serve --port N` must win over the port stored in the config file: reading
+  // the merged config alone silently dialed the stored port while still
+  // printing the flag's value.
+  const runtimeConfig = (): BeautifyConfig => ({ ...currentConfig(), port: cdpPort });
+  /** What actually goes to disk — the CLI's --port is not a persisted setting. */
+  const persisted = (config: BeautifyConfig): BeautifyConfig => ({
+    ...config,
+    port: currentConfig().port,
+  });
+
+  const already = await existingServePid(apiPort);
+  if (already !== undefined) {
+    throw new Error(
+      `a beautify service is already running on http://127.0.0.1:${apiPort} (pid ${already}) — ` +
+        `open its panel, or stop that process first`
+    );
+  }
+
+  // A request handler that rejects would otherwise take the whole process down
+  // (unhandled rejection), killing every held injection session with it.
+  const server = http.createServer((req, res) => {
+    handleRequest(req, res).catch(() => {
+      try {
+        res.destroy();
+      } catch {
+        /* socket gone */
+      }
+    });
+  });
+
+  async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     try {
       if (req.method === "OPTIONS") {
@@ -233,14 +282,14 @@ export async function startServe(opts: ServeOptions): Promise<void> {
       }
 
       if (req.method === "GET" && url.pathname === "/api/config") {
-        sendJson(res, 200, publicConfig(currentConfig()));
+        sendJson(res, 200, publicConfig(runtimeConfig()));
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/config") {
         const patch = sanitize(JSON.parse(await readBody(req)));
-        const config = { ...currentConfig(), ...patch };
-        saveConfig(config);
+        const config = { ...runtimeConfig(), ...patch };
+        saveConfig(persisted(config));
         const windows = await pushConfigToSessions(config).catch(() => 0);
         sendJson(res, 200, { ok: true, windows, ...publicConfig(config) });
         return;
@@ -255,12 +304,12 @@ export async function startServe(opts: ServeOptions): Promise<void> {
         if (bytes.length > MAX_WALLPAPER_BYTES) {
           throw new Error(`image too large (max ${MAX_WALLPAPER_BYTES / 1024 / 1024} MB)`);
         }
-        const config = currentConfig();
+        const config = runtimeConfig();
         fs.mkdirSync(dataDir(), { recursive: true });
         const dest = path.join(dataDir(), "wallpaper" + IMAGE_EXT[m[1]]);
         fs.writeFileSync(dest, bytes);
         cachedAssets = { file: dest, mtimeMs: fs.statSync(dest).mtimeMs, assets: await loadWallpaper(dest) };
-        saveConfig({ ...config, wallpaperPath: dest });
+        saveConfig(persisted({ ...config, wallpaperPath: dest }));
         const windows = await pushConfigToSessions({ ...config, wallpaperPath: dest }).catch(() => 0);
         sendJson(res, 200, { ok: true, windows, ...publicConfig({ ...config, wallpaperPath: dest }) });
         return;
@@ -309,7 +358,7 @@ export async function startServe(opts: ServeOptions): Promise<void> {
       }
 
       if (req.method === "GET" && url.pathname === "/api/health") {
-        sendJson(res, 200, { ok: true });
+        sendJson(res, 200, { ok: true, service: "zcode-beautify", pid: process.pid });
         return;
       }
 
@@ -317,20 +366,26 @@ export async function startServe(opts: ServeOptions): Promise<void> {
     } catch (err) {
       sendJson(res, 400, { error: (err as Error).message });
     }
-  });
+  }
 
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(apiPort, "127.0.0.1", resolve);
   });
 
+  // The listen-time listener above is one-shot; without a permanent one, any
+  // later server error would be an unhandled 'error' event and crash serve.
+  server.on("error", (err) => {
+    console.error(`serve: http server error — ${(err as Error).message}`);
+  });
+
   console.log(`serve: control API on http://127.0.0.1:${apiPort} — Ctrl+C to stop`);
   console.log(`serve: injecting into ZCode renderers on CDP port ${cdpPort}`);
 
   // Initial pass, then keep polling so restarts of the app get re-injected.
-  await poll(currentConfig(), apiPort);
+  await poll(runtimeConfig(), apiPort);
   for (;;) {
     await new Promise((r) => setTimeout(r, POLL_MS));
-    await poll(currentConfig(), apiPort);
+    await poll(runtimeConfig(), apiPort);
   }
 }

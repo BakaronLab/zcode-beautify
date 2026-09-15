@@ -4,8 +4,9 @@
  * visibility, and swapping the wallpaper image — all via the local API
  * started by `zcode-beautify serve`.
  *
- * The script is idempotent: if the panel root already exists it does nothing,
- * so it is safe to (re-)evaluate on every injection or reload.
+ * The script always rebuilds the panel, so a stale copy left in the DOM can
+ * never shadow a newer script version, and it is safe to re-evaluate on every
+ * injection or reload.
  */
 
 export const PANEL_ROOT_ID = "zcode-beautify-panel-root";
@@ -47,7 +48,19 @@ export function buildPanelScript(apiPort: number): string {
     '.zb-btn { display: inline-block; padding: 6px 20px; text-align: center; border-radius: 999px; cursor: pointer;',
       ' background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); color: inherit; font-size: 12px; }',
     '.zb-btn:hover { background: rgba(255,255,255,.16); }',
-    '#zb-status { min-height: 14px; padding: 2px 12px 0; opacity: .6; font-size: 11px; }'
+    '#zb-status { min-height: 14px; padding: 2px 12px 0; opacity: .6; font-size: 11px; }',
+    '#zb-offline { display: flex; flex-direction: column; gap: 6px; align-items: center;',
+      ' padding: 10px 12px; background: rgba(120,53,15,.55); font-size: 11px; line-height: 1.5; text-align: center; }',
+    '#zb-offline[hidden] { display: none; }',
+    '#zb-offline code { background: rgba(0,0,0,.35); padding: 1px 4px; border-radius: 4px;',
+      ' font-size: 10px; user-select: text; }',
+    '#zb-offline .zb-hint { opacity: .85; }',
+    // While offline the controls hold nothing we could read, so they must not
+    // look interactive — a slider parked mid-track next to a "0px" label reads
+    // as a real (wrong) setting.
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-body { opacity: .45; pointer-events: none; }',
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-status { display: none; }',
+    '#zcode-beautify-panel-root[data-offline="1"] #zb-fab { border-color: rgba(248,113,113,.7); }'
   ].join('');
 
   var style = document.createElement('style');
@@ -61,17 +74,22 @@ export function buildPanelScript(apiPort: number): string {
     '<div id="zb-fab" title="ZCode Beautify">🎨</div>' +
     '<div id="zb-panel" hidden>' +
     '  <div id="zb-head"><span>ZCode Beautify</span><span id="zb-close">✕</span></div>' +
+    '  <div id="zb-offline" hidden>' +
+    '    <div>⚠ 美化服务未运行,面板不可用</div>' +
+    '    <div class="zb-hint">在插件目录执行 <code>node dist/cli.js serve --detach</code> 启动</div>' +
+    '    <button class="zb-btn" id="zb-retry">重试连接</button>' +
+    '  </div>' +
     '  <div id="zb-body">' +
     '    <div class="zb-row"><label title="背景模糊程度(像素)"><span>背景模糊</span><span><span id="zb-blur-val">0</span>px</span></label>' +
-    '      <input type="range" id="zb-blur" min="0" max="30" step="1"></div>' +
+    '      <input type="range" id="zb-blur" min="0" max="30" step="1" value="0"></div>' +
     '    <div class="zb-row"><label title="背景压暗程度(百分比,越高越暗)"><span>背景压暗</span><span><span id="zb-dim-val">0</span>%</span></label>' +
-    '      <input type="range" id="zb-dim" min="0" max="80" step="1"></div>' +
+    '      <input type="range" id="zb-dim" min="0" max="80" step="1" value="0"></div>' +
     '    <div class="zb-row zb-toggles">' +
     '      <label title="根据壁纸自动生成 UI 配色;关闭则保留 ZCode 原生颜色"><input type="checkbox" id="zb-monet">UI 莫奈取色</label>' +
     '      <label title="显示或隐藏背景壁纸"><input type="checkbox" id="zb-vis">显示壁纸</label>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
-    '      <button class="zb-btn" id="zb-fit" title="背景填充方式:填满裁剪铺满窗口 / 完整显示不裁剪(模糊垫底)/ 智能适配自动分析画面主体"></button>' +
+    '      <button class="zb-btn" id="zb-fit" title="背景填充方式:填满裁剪铺满窗口 / 完整显示不裁剪(模糊垫底)/ 智能适配自动分析画面主体">背景填充: …</button>' +
     '    </div>' +
     '    <div class="zb-row zb-actions">' +
     '      <label class="zb-btn" for="zb-file" title="选择一张图片作为背景壁纸,UI 配色随之更新">更换图片…</label>' +
@@ -121,10 +139,42 @@ export function buildPanelScript(apiPort: number): string {
     }, 300);
   }
 
+  // The control service lives in a separate process that can stop or die. When
+  // it is unreachable the panel must say so instead of rendering values it
+  // never read, and it must recover on its own once the service is back.
+  var beatTimer = null;
+  function panelOpen() { return !$('zb-panel').hidden; }
+  /** Re-check the service: while the panel is open, and always while offline. */
+  function beat(on) {
+    if (on && !beatTimer) beatTimer = setInterval(refresh, 4000);
+    if (!on && beatTimer) { clearInterval(beatTimer); beatTimer = null; }
+  }
+
+  function setOffline(on) {
+    root.setAttribute('data-offline', on ? '1' : '0');
+    $('zb-offline').hidden = !on;
+    $('zb-retry').textContent = '重试连接';
+    $('zb-fab').title = on ? 'ZCode Beautify — 美化服务未运行' : 'ZCode Beautify';
+    if (on) {
+      $('zb-blur').value = 0; $('zb-blur-val').textContent = '0';
+      $('zb-dim').value = 0; $('zb-dim-val').textContent = '0';
+      $('zb-monet').checked = false;
+      $('zb-vis').checked = false;
+      $('zb-fit').textContent = '背景填充: 未知';
+      $('zb-fit').removeAttribute('data-fit');
+      $('zb-reset').textContent = '还原默认外观';
+      $('zb-reset').setAttribute('data-mode', 'reset');
+      beat(true);
+    } else {
+      if (!panelOpen()) beat(false);
+    }
+  }
+
   function refresh() {
     fetch(API + '/api/config')
       .then(function (r) { return r.json(); })
       .then(function (c) {
+        setOffline(false);
         $('zb-blur').value = c.blur; $('zb-blur-val').textContent = c.blur;
         $('zb-dim').value = c.dim; $('zb-dim-val').textContent = c.dim;
         $('zb-monet').checked = !!c.monet;
@@ -145,7 +195,7 @@ export function buildPanelScript(apiPort: number): string {
           resetBtn.title = '当前已是默认外观';
         }
       })
-      .catch(function () { status('无法连接美化服务 service unreachable'); });
+      .catch(function () { setOffline(true); });
   }
 
   $('zb-blur').addEventListener('input', function () {
@@ -195,12 +245,25 @@ export function buildPanelScript(apiPort: number): string {
     });
   });
 
+  $('zb-retry').addEventListener('click', function () {
+    this.textContent = '正在重试…';
+    refresh();
+  });
+
   $('zb-fab').addEventListener('click', function () {
     var p = $('zb-panel');
     p.hidden = !p.hidden;
-    if (!p.hidden) refresh();
+    if (!p.hidden) {
+      refresh();
+      beat(true);
+    } else if (root.getAttribute('data-offline') !== '1') {
+      beat(false);
+    }
   });
-  $('zb-close').addEventListener('click', function () { $('zb-panel').hidden = true; });
+  $('zb-close').addEventListener('click', function () {
+    $('zb-panel').hidden = true;
+    if (root.getAttribute('data-offline') !== '1') beat(false);
+  });
 
   // Fill in the fit label (and control values) right away, not just on open.
   refresh();

@@ -10,9 +10,11 @@
  *   serve    Watch mode + settings panel + local control API.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import { applyToZCode, type BeautifyConfig } from "./core/inject.js";
 import type { ApplyOptions } from "./core/session.js";
-import { launchZcode } from "./core/launch.js";
+import { launchZcode, dataDir } from "./core/launch.js";
 import { applyWallpaper, resetAppearance } from "./core/session.js";
 
 const USAGE = `zcode-beautify <command> [options]
@@ -29,7 +31,9 @@ Commands:
   reset [--port N]               Remove wallpaper and color overrides
   status [--port N]              Show CDP reachability and renderer targets
   watch [--port N]               Watch mode: re-inject whenever ZCode (re)starts
-  serve [--port N] [--api-port M]  Watch mode + settings panel + local API (default API port 9223)
+  serve [--port N] [--api-port M] [--detach]
+                                 Watch mode + settings panel + local API (default API port 9223)
+                                 --detach runs it in the background, outliving this shell
 `;
 
 async function main(): Promise<void> {
@@ -104,8 +108,12 @@ async function main(): Promise<void> {
         break;
       }
       case "serve": {
-        const { startServe } = await import("./core/server.js");
         const apiPort = Number(flag("--api-port") ?? 9223);
+        if (has("--detach")) {
+          await startServeDetached(port, apiPort);
+          break;
+        }
+        const { startServe } = await import("./core/server.js");
         await startServe({ cdpPort: port, apiPort });
         break;
       }
@@ -122,6 +130,57 @@ async function main(): Promise<void> {
     console.error(`error: ${(err as Error).message}`);
     process.exitCode = 1;
   }
+}
+
+/**
+ * Runs `serve` as a detached process so the settings panel keeps working after
+ * the terminal, agent session, or command invocation that started it is gone.
+ */
+async function startServeDetached(cdpPort: number, apiPort: number): Promise<void> {
+  const { spawn } = await import("node:child_process");
+  const { existingServePid } = await import("./core/server.js");
+
+  // The child's own duplicate check runs in the background where nobody can see
+  // it: probing the port afterwards would find the *existing* service healthy
+  // and report a success that never happened. Check before spawning instead.
+  const already = await existingServePid(apiPort);
+  if (already !== undefined) {
+    throw new Error(
+      `a beautify service is already running on http://127.0.0.1:${apiPort} (pid ${already}) — ` +
+        `open its panel, or stop that process first`
+    );
+  }
+
+  fs.mkdirSync(dataDir(), { recursive: true });
+  const logFile = path.join(dataDir(), "serve.log");
+  const out = fs.openSync(logFile, "a");
+  const child = spawn(
+    process.execPath,
+    [process.argv[1], "serve", "--port", String(cdpPort), "--api-port", String(apiPort)],
+    { detached: true, stdio: ["ignore", out, out], windowsHide: true }
+  );
+  child.unref();
+  fs.closeSync(out);
+
+  // A detached spawn reports nothing, so confirm the service really came up.
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 500));
+    try {
+      const res = await fetch(`http://127.0.0.1:${apiPort}/api/health`, {
+        signal: AbortSignal.timeout(1000),
+      });
+      const body = (await res.json()) as { service?: string; pid?: number };
+      if (body?.service === "zcode-beautify") {
+        console.log(`Beautify service running on http://127.0.0.1:${apiPort} (pid ${body.pid}).`);
+        console.log(`Log: ${logFile}`);
+        return;
+      }
+    } catch {
+      /* not up yet */
+    }
+  }
+  console.error(`serve did not come up within 10s — see ${logFile}`);
+  process.exitCode = 1;
 }
 
 async function watch(port: number): Promise<void> {
