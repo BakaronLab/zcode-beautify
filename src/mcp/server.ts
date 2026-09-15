@@ -9,9 +9,12 @@ import { z } from "zod";
 import { applyColorsOnly, applyWallpaper, reapplyStored, resetAppearance } from "../core/session.js";
 import { loadConfig } from "../core/launch.js";
 
+// Substituted at bundle time by scripts/bundle.mjs from package.json.
+declare const __PLUGIN_VERSION__: string;
+
 const server = new McpServer({
   name: "zcode-beautify",
-  version: "0.2.1",
+  version: __PLUGIN_VERSION__,
 });
 
 server.registerTool(

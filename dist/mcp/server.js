@@ -144588,7 +144588,14 @@ import fs3 from "node:fs";
 import os from "node:os";
 import path from "node:path";
 function dataDir() {
-  return process.env.ZCODE_BEAUTIFY_DATA_DIR ?? path.join(os.homedir(), ".zcode", "cli", "plugins", "data", "zcode-beautify");
+  const override = process.env.ZCODE_BEAUTIFY_DATA_DIR;
+  if (override)
+    return override;
+  const root = path.join(os.homedir(), ".zcode", "cli", "plugins", "data");
+  const pluginScoped = path.join(root, "zcode-beautify@zcode-beautify");
+  if (fs3.existsSync(pluginScoped))
+    return pluginScoped;
+  return path.join(root, "zcode-beautify");
 }
 function configFile() {
   return path.join(dataDir(), "config.json");

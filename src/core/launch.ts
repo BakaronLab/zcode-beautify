@@ -18,10 +18,17 @@ export interface StoredConfig extends Partial<Omit<import("./inject.js").Beautif
 }
 
 export function dataDir(): string {
-  return (
-    process.env.ZCODE_BEAUTIFY_DATA_DIR ??
-    path.join(os.homedir(), ".zcode", "cli", "plugins", "data", "zcode-beautify")
-  );
+  const override = process.env.ZCODE_BEAUTIFY_DATA_DIR;
+  if (override) return override;
+
+  const root = path.join(os.homedir(), ".zcode", "cli", "plugins", "data");
+  // ZCode resolves ${ZCODE_PLUGIN_DATA} to "<name>@<marketplace>", so a plugin
+  // install and a manually run CLI would otherwise write two different configs.
+  // Prefer the plugin-scoped directory when it exists.
+  const pluginScoped = path.join(root, "zcode-beautify@zcode-beautify");
+  if (fs.existsSync(pluginScoped)) return pluginScoped;
+
+  return path.join(root, "zcode-beautify");
 }
 
 export function configFile(): string {
