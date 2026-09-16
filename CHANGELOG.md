@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.3.1
+
+Fixes the autostart entry behind recovery mode `always` on Windows. The script
+it wrote was not valid VBScript, so Windows Script Host never ran it: the entry
+was present and enabled, yet the resident service never started and the theme
+was gone after every reboot.
+
+### Fixed
+
+- `autostart install` (and selecting `always`) assembled the command line out of
+  separately quoted fragments, leaving everything after the first path outside a
+  string literal — a parse error, not a concatenation. The whole command is now
+  one VBScript string literal, with the paths quoted for Windows inside it.
+  Re-run `zcode-beautify autostart install` (or re-select `always` in the
+  settings panel) to rewrite an existing entry; it only matters from the next
+  sign-in, since a running service keeps working either way.
+
 ## v0.3.0
 
 The theme now restores itself. This release fixes the "the plugin stopped

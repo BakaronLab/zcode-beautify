@@ -110113,13 +110113,13 @@ function cliEntryPath() {
     return path3.resolve(entry ?? "");
   }
 }
-function quoteVbs(value) {
-  return `""${value.replace(/"/g, '""')}""`;
+function vbsLiteral(value) {
+  return `"${value.replace(/"/g, '""')}"`;
 }
 function windowsScript(spec) {
   const command = [
-    quoteVbs(spec.nodePath),
-    quoteVbs(spec.cliPath),
+    `"${spec.nodePath}"`,
+    `"${spec.cliPath}"`,
     "serve",
     "--port",
     String(spec.cdpPort),
@@ -110131,7 +110131,7 @@ function windowsScript(spec) {
     `' ZCode Beautify \u2014 restores the wallpaper and Monet colors after ZCode restarts.`,
     `' Runs \`serve --detach\` in the background, with no visible window.`,
     `' Delete this file (or run \`zcode-beautify autostart uninstall\`) to disable it.`,
-    `CreateObject("WScript.Shell").Run ${command}, 0, False`,
+    `CreateObject("WScript.Shell").Run ${vbsLiteral(command)}, 0, False`,
     ``
   ].join("\r\n");
 }
