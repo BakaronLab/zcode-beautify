@@ -69,14 +69,20 @@ export function cliEntryPath(): string {
   }
 }
 
-function quoteVbs(value: string): string {
-  return `""${value.replace(/"/g, '""')}""`;
+/**
+ * The command line as one VBScript string literal. VBScript writes a literal
+ * quote as `""`, and the whole command has to stay inside that single literal:
+ * WScript.Shell.Run takes the command already split, so text left outside the
+ * quotes (as in `"""a""" """b"""`) is a syntax error, not a concatenation.
+ */
+function vbsLiteral(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
 }
 
 function windowsScript(spec: AutostartSpec): string {
   const command = [
-    quoteVbs(spec.nodePath),
-    quoteVbs(spec.cliPath),
+    `"${spec.nodePath}"`,
+    `"${spec.cliPath}"`,
     "serve",
     "--port",
     String(spec.cdpPort),
@@ -88,7 +94,7 @@ function windowsScript(spec: AutostartSpec): string {
     `' ZCode Beautify — restores the wallpaper and Monet colors after ZCode restarts.`,
     `' Runs \`serve --detach\` in the background, with no visible window.`,
     `' Delete this file (or run \`zcode-beautify autostart uninstall\`) to disable it.`,
-    `CreateObject("WScript.Shell").Run ${command}, 0, False`,
+    `CreateObject("WScript.Shell").Run ${vbsLiteral(command)}, 0, False`,
     ``,
   ].join("\r\n");
 }
