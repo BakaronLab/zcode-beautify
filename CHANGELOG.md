@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.2
+
+Stops the resident service from flashing a black console window on Windows.
+
+### Fixed
+
+- The process probe in `isZcodeProcessRunning()` ran `tasklist` without hiding
+  the child console. The probe runs inside the detached `serve` daemon, which has
+  no console of its own, so Windows allocated a fresh one on every call — and
+  Windows 11 hands a new console to Windows Terminal. The result was a window
+  titled `C:\WINDOWS\system32\tasklist.exe` appearing and vanishing every ~15
+  seconds whenever the probe fired, i.e. whenever ZCode was not running, for as
+  long as the daemon stayed alive. `tasklist`, `taskkill` and the PowerShell
+  launcher-repair call are now spawned with `windowsHide: true`, which is what
+  the launcher spawn and the daemon's own `spawn` already did.
+
 ## v0.3.1
 
 Fixes the autostart entry behind recovery mode `always` on Windows. The script
