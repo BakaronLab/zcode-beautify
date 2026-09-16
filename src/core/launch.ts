@@ -82,7 +82,12 @@ const execFileAsync = promisify(execFile);
 export async function isZcodeProcessRunning(): Promise<boolean> {
   try {
     if (process.platform === "win32") {
-      const { stdout } = await execFileAsync("tasklist", ["/NH", "/FI", "IMAGENAME eq ZCode.exe"]);
+      // This runs from the detached `serve` daemon, which has no console of its
+      // own: without windowsHide Windows allocates a fresh console and the user
+      // sees a black window flash every time the probe fires.
+      const { stdout } = await execFileAsync("tasklist", ["/NH", "/FI", "IMAGENAME eq ZCode.exe"], {
+        windowsHide: true,
+      });
       return stdout.toLowerCase().includes("zcode.exe");
     }
     const name = process.platform === "darwin" ? "ZCode" : "zcode";
@@ -159,7 +164,7 @@ export async function launchZcode(port: number): Promise<LaunchResult> {
 async function killZcode(): Promise<boolean> {
   try {
     if (process.platform === "win32") {
-      await execFileAsync("taskkill", ["/F", "/IM", "ZCode.exe"]);
+      await execFileAsync("taskkill", ["/F", "/IM", "ZCode.exe"], { windowsHide: true });
     } else {
       await execFileAsync("pkill", ["-x", process.platform === "darwin" ? "ZCode" : "zcode"]);
     }
