@@ -110,6 +110,11 @@ async function main(): Promise<void> {
           for (const t of targets) console.log(`  - [${t.id}] ${t.title} ${t.url}`);
         } catch (err) {
           console.log(`CDP not reachable on port ${port}: ${(err as Error).message}`);
+          console.log(
+            `If ZCode is running, it was probably started from an entry that lacks the debug flag.\n` +
+              `Run \`zcode-beautify repair-launchers\` (add --dry-run to preview) to fix every entry,\n` +
+              `then quit ZCode completely and start it from one of the fixed shortcuts.`
+          );
           process.exitCode = 1;
         }
         break;

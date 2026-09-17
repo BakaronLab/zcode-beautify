@@ -24,9 +24,14 @@ modifies ZCode's installation files.
    running ZCode renderer.
 3. **On CDP/port errors**: the ZCode instance is running without the debug
    port. Run `repair_launchers` first — it appends `--remote-debugging-port` to
-   every launch entry missing it, so a normal start opens the port from then on.
-   Then have the user quit ZCode completely and start it again; the flag cannot
-   be added to an instance that is already running.
+   every launch entry missing it (desktop, Start Menu, pinned taskbar, the
+   `zcode://` handler, the context-menu verbs), so a normal start opens the port
+   from then on. Then have the user quit ZCode completely and start it again;
+   the flag cannot be added to an instance that is already running. Expect to
+   repeat this over time: ZCode's updater rebuilds the Start Menu shortcut
+   without the flag, and the app re-registers its protocol / context-menu
+   registry entries on every start. In `on-start` mode the plugin performs this
+   repair by itself at startup whenever the port is unreachable.
 4. **Fine-tune with `apply_options`** (blur / dim / monet / wallpaper_visible /
    fit) when the user wants adjustments — it does not need the image path
    again. `fit` picks the framing: `cover` fills and crops, `contain`
@@ -60,13 +65,16 @@ modifies ZCode's installation files.
 | `beautify_status` | Show stored config |
 | `recovery_status` | Report the recovery mode, autostart entry and CDP reachability |
 | `set_recovery_mode` | Switch between `off` / `on-start` / `always` |
-| `repair_launchers` | Add the debug-port flag to launch entries missing it |
+| `repair_launchers` | Add the debug-port flag to every launch entry missing it; re-run after ZCode updates |
 
 ## Constraints
 
 - ZCode must be running (or startable) with `--remote-debugging-port=9222`. The
   flag can only come from the launcher — `repair_launchers` writes it into the
   shortcuts and protocol handlers, and machine-wide entries need admin rights.
+  Shortcuts are the durable entries; ZCode's updater rebuilds the Start Menu one
+  and the app re-registers its registry handlers, so both can lose the flag
+  again.
 - The injected theme lives in the renderer and is wiped when ZCode restarts. The
   recovery mode decides who puts it back; `refresh_theme` forces it.
 - Functional colors (success/warning/destructive) are intentionally preserved.

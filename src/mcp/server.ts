@@ -205,8 +205,10 @@ server.registerTool(
     description:
       "ZCode only opens its CDP port when it is started with --remote-debugging-port, and that flag has to come from the " +
       "shortcut or handler that launches it. A machine usually has several launch entries and only some carry the flag. " +
-      "This scans the desktop and Start Menu shortcuts plus the zcode:// protocol and Explorer context-menu verbs, and adds " +
-      "the flag where it is missing. Machine-wide entries that need administrator rights are reported, not modified.",
+      "This scans the desktop, Start Menu and pinned-taskbar shortcuts plus the zcode:// protocol and Explorer context-menu " +
+      "verbs, and adds the flag where it is missing. Machine-wide entries that need administrator rights are reported, not " +
+      "modified. Shortcuts are the durable entries: ZCode's updater rebuilds the Start Menu shortcut without the flag, and " +
+      "the app re-registers its protocol and context-menu handlers on every start, so registry entries may need repairing again.",
     inputSchema: {
       dry_run: z.boolean().optional().describe("Only report what would change; write nothing"),
     },
@@ -255,6 +257,42 @@ async function restoreAfterStart(): Promise<void> {
     } catch {
       /* CDP not up yet, or ZCode started without the debug port */
     }
+  }
+
+  await repairMissingLauncherFlags();
+}
+
+/**
+ * The theme never came back, which usually means ZCode is running without the
+ * debug port because its launch entry lost the flag: the app's updater rebuilds
+ * the Start Menu shortcut without it, and most third-party launchers start the
+ * app through that shortcut. This session cannot be fixed (the running instance
+ * read its argv once at startup), but repairing the entries now means the next
+ * start is clean — the same repair `repair-launchers` does by hand, just
+ * automatic. Fail-soft: it runs in the MCP host, so problems go to stderr (the
+ * plugin log) and never to stdout, which carries the MCP protocol.
+ */
+async function repairMissingLauncherFlags(): Promise<void> {
+  const port = loadConfig().port ?? DEFAULT_CONFIG.port;
+  try {
+    const report = await repairLaunchers({ port });
+    if (report.error) {
+      console.error(`launcher check failed: ${report.error}`);
+      return;
+    }
+    const updated = report.fixes.filter((f) => f.status === "updated");
+    if (updated.length === 0) {
+      console.error(
+        `CDP port ${port} is unreachable but every launch entry already carries the flag — ` +
+          `ZCode was probably started from an entry that was not repaired, or not via a shortcut at all.`
+      );
+      return;
+    }
+    console.error(`CDP port ${port} is unreachable; added the missing flag to ${updated.length} launch entry(ies):`);
+    for (const f of updated) console.error(`  ${f.path}`);
+    console.error("Quit ZCode completely and start it from one of these entries to bring the theme back.");
+  } catch (err) {
+    console.error(`launcher check failed: ${(err as Error).message}`);
   }
 }
 

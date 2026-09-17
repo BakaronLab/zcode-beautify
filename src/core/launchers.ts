@@ -5,13 +5,20 @@
  * `--remote-debugging-port=<port>`, and that argument has to come from whatever
  * launches it — the app cannot add it to itself once it is running. A typical
  * machine has several entry points (desktop shortcut, Start Menu shortcut, the
- * machine-wide Public Desktop shortcut, the `zcode://` protocol handler and the
- * Explorer context-menu verbs) and usually only some of them carry the flag.
+ * pinned taskbar shortcut, the machine-wide Public Desktop shortcut, the
+ * `zcode://` protocol handler and the Explorer context-menu verbs) and usually
+ * only some of them carry the flag.
  *
  * This module finds the ones that don't and adds it. All writes are per-user:
- * shortcuts in the user's own Desktop / Start Menu, plus ZCode's HKCU protocol
- * and shell handlers. The machine-wide Public Desktop and Start Menu are
- * reported as failures rather than attempted, because they need elevation.
+ * shortcuts in the user's own Desktop / Start Menu / pinned taskbar, plus
+ * ZCode's HKCU protocol and shell handlers. The machine-wide Public Desktop and
+ * Start Menu are reported as failures rather than attempted, because they need
+ * elevation.
+ *
+ * Two caveats the user is told about in the docs: ZCode's updater rebuilds the
+ * Start Menu shortcut without the flag, and the app re-registers its HKCU
+ * handlers on every start, so the registry entries only stay fixed until the
+ * next launch. Shortcuts are the durable entries.
  */
 
 import { execFile } from "node:child_process";
@@ -66,6 +73,10 @@ function Add-Result($kind, $p, $before, $after, $status, $reason) {
 $dirs = @(
   (Join-Path $env:USERPROFILE 'Desktop'),
   (Join-Path $env:APPDATA 'Microsoft\\Windows\\Start Menu\\Programs'),
+  # Pinned taskbar shortcuts are plain .lnk files; start-menu search and most
+  # third-party launchers (Flow Launcher, PowerToys Run, …) index the Start Menu
+  # copy, but users who pin the app read this one.
+  (Join-Path $env:APPDATA 'Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar'),
   (Join-Path $env:PUBLIC 'Desktop'),
   (Join-Path $env:ProgramData 'Microsoft\\Windows\\Start Menu\\Programs')
 )
