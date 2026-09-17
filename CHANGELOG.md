@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.3.3
+
+The plugin now keeps the debug port alive across ZCode updates by itself, and
+covers one more class of launch entry.
+
+### Added
+
+- **Startup launcher check.** When ZCode starts without the debug port — the
+  failure mode after every app update, because the updater rebuilds the Start
+  Menu shortcut without the flag — the MCP host repairs the launch entries as
+  soon as it has confirmed the port is unreachable, so the *next* start is
+  clean. Same repair as `repair-launchers`, no resident cost, and nothing runs
+  while the port is reachable. This matters most for third-party launchers
+  (Flow Launcher, PowerToys Run, …): they index the Start Menu shortcut and
+  start it through ShellExecute, so the flag on that shortcut is what makes
+  them work.
+- Pinned taskbar shortcuts (`…\Quick Launch\User Pinned\TaskBar`) are scanned
+  and repaired like the other per-user shortcuts.
+
+### Changed
+
+- `status` explains the likely cause — and the fix — when the CDP port is
+  unreachable, instead of only reporting the error.
+- README and INSTALL-FOR-AI document which entries ZCode itself resets: the
+  updater rebuilds the Start Menu shortcut without the flag, and the app
+  re-registers its protocol and context-menu registry handlers on every start.
+  Shortcuts are the durable entries.
+
 ## v0.3.2
 
 Stops the resident service from flashing a black console window on Windows.

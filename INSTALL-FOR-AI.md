@@ -24,7 +24,7 @@ If they want to beautify a non-ZCode app or develop their own → read
 
 ## What you are installing
 
-`zcode-beautify` v0.3.2 — a ZCode plugin that adds a wallpaper layer +
+`zcode-beautify` v0.3.3 — a ZCode plugin that adds a wallpaper layer +
 Material Design 3 (Monet) dynamic color to the ZCode desktop client over CDP,
 with a `/beautify` slash command, MCP tools (`set_background`, `apply_options`,
 `refresh_theme`, `reset_appearance`, `beautify_status`, `recovery_status`,
@@ -87,7 +87,7 @@ everything else.
 4. **Cache the plugin** (what the UI does on "Get"):
    ```text
    from: <clone>/                      (or the staged marketplace copy)
-   to:   ~/.zcode/cli/plugins/cache/zcode-beautify/zcode-beautify/0.3.2/
+   to:   ~/.zcode/cli/plugins/cache/zcode-beautify/zcode-beautify/0.3.3/
    ```
    Read the exact version from `.zcode-plugin/plugin.json` — the folder name
    must equal it.
@@ -106,7 +106,7 @@ everything else.
      "id": "zcode-beautify@zcode-beautify",
      "name": "zcode-beautify",
      "marketplace": "zcode-beautify",
-     "version": "0.3.2",
+     "version": "0.3.3",
      "installPath": "<the cache folder from step 4>",
      "installedAt": "<now, ISO-8601>",
      "updatedAt": "<now, ISO-8601>",
@@ -141,12 +141,19 @@ everything else.
    ```bash
    node <plugin-dir>/dist/cli.js repair-launchers
    ```
-   It scans every launch entry (desktop and Start Menu shortcuts, the `zcode://`
-   protocol handler, the Explorer context-menu verbs) and appends
-   ` --remote-debugging-port=9222` to the ones missing it. Entries that need
-   administrator rights are reported as `failed` and left untouched — launching
-   from one of the updated shortcuts covers the common case. Add `--dry-run`
-   first if you want to show the user what would change.
+   It scans every launch entry (desktop, Start Menu and pinned-taskbar
+   shortcuts, the `zcode://` protocol handler, the Explorer context-menu verbs)
+   and appends ` --remote-debugging-port=9222` to the ones missing it. Entries
+   that need administrator rights are reported as `failed` and left untouched —
+   launching from one of the updated shortcuts covers the common case. Add
+   `--dry-run` first if you want to show the user what would change.
+   Tell the user two facts for later: ZCode's updater rebuilds the Start Menu
+   shortcut without the flag, and the app re-registers its protocol and
+   context-menu handlers on every start, so both can lose the flag again. Most
+   third-party launchers (Flow Launcher, PowerToys Run, …) start the app through
+   the Start Menu shortcut. The plugin repairs the entries by itself on the next
+   start without the debug port (`on-start` mode), and `repair-launchers` can be
+   re-run by hand any time.
    Then tell the user: one full restart of ZCode with the flag is required
    (quit completely — the tray icon counts — and start from an updated entry).
 4. **Ask the user how the theme should come back after a ZCode restart.** The

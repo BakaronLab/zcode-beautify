@@ -111056,6 +111056,10 @@ function Add-Result($kind, $p, $before, $after, $status, $reason) {
 $dirs = @(
   (Join-Path $env:USERPROFILE 'Desktop'),
   (Join-Path $env:APPDATA 'Microsoft\\Windows\\Start Menu\\Programs'),
+  # Pinned taskbar shortcuts are plain .lnk files; start-menu search and most
+  # third-party launchers (Flow Launcher, PowerToys Run, \u2026) index the Start Menu
+  # copy, but users who pin the app read this one.
+  (Join-Path $env:APPDATA 'Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar'),
   (Join-Path $env:PUBLIC 'Desktop'),
   (Join-Path $env:ProgramData 'Microsoft\\Windows\\Start Menu\\Programs')
 )
@@ -111258,6 +111262,9 @@ Quit ZCode completely (including any tray icon), then run \`zcode-beautify launc
             console.log(`  - [${t2.id}] ${t2.title} ${t2.url}`);
         } catch (err) {
           console.log(`CDP not reachable on port ${port}: ${err.message}`);
+          console.log(`If ZCode is running, it was probably started from an entry that lacks the debug flag.
+Run \`zcode-beautify repair-launchers\` (add --dry-run to preview) to fix every entry,
+then quit ZCode completely and start it from one of the fixed shortcuts.`);
           process.exitCode = 1;
         }
         break;

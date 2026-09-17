@@ -144847,6 +144847,10 @@ function Add-Result($kind, $p, $before, $after, $status, $reason) {
 $dirs = @(
   (Join-Path $env:USERPROFILE 'Desktop'),
   (Join-Path $env:APPDATA 'Microsoft\\Windows\\Start Menu\\Programs'),
+  # Pinned taskbar shortcuts are plain .lnk files; start-menu search and most
+  # third-party launchers (Flow Launcher, PowerToys Run, \u2026) index the Start Menu
+  # copy, but users who pin the app read this one.
+  (Join-Path $env:APPDATA 'Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar'),
   (Join-Path $env:PUBLIC 'Desktop'),
   (Join-Path $env:ProgramData 'Microsoft\\Windows\\Start Menu\\Programs')
 )
@@ -144966,7 +144970,7 @@ async function repairLaunchers(opts) {
 // dist/mcp/server.js
 var server = new McpServer({
   name: "zcode-beautify",
-  version: "0.3.2"
+  version: "0.3.3"
 });
 server.registerTool("set_background", {
   title: "Set ZCode wallpaper",
@@ -145096,7 +145100,7 @@ server.registerTool("set_recovery_mode", {
 });
 server.registerTool("repair_launchers", {
   title: "Fix ZCode launch entries",
-  description: "ZCode only opens its CDP port when it is started with --remote-debugging-port, and that flag has to come from the shortcut or handler that launches it. A machine usually has several launch entries and only some carry the flag. This scans the desktop and Start Menu shortcuts plus the zcode:// protocol and Explorer context-menu verbs, and adds the flag where it is missing. Machine-wide entries that need administrator rights are reported, not modified.",
+  description: "ZCode only opens its CDP port when it is started with --remote-debugging-port, and that flag has to come from the shortcut or handler that launches it. A machine usually has several launch entries and only some carry the flag. This scans the desktop, Start Menu and pinned-taskbar shortcuts plus the zcode:// protocol and Explorer context-menu verbs, and adds the flag where it is missing. Machine-wide entries that need administrator rights are reported, not modified. Shortcuts are the durable entries: ZCode's updater rebuilds the Start Menu shortcut without the flag, and the app re-registers its protocol and context-menu handlers on every start, so registry entries may need repairing again.",
   inputSchema: {
     dry_run: external_exports.boolean().optional().describe("Only report what would change; write nothing")
   }
@@ -145130,6 +145134,28 @@ async function restoreAfterStart() {
         return;
     } catch {
     }
+  }
+  await repairMissingLauncherFlags();
+}
+async function repairMissingLauncherFlags() {
+  const port = loadConfig().port ?? DEFAULT_CONFIG.port;
+  try {
+    const report = await repairLaunchers({ port });
+    if (report.error) {
+      console.error(`launcher check failed: ${report.error}`);
+      return;
+    }
+    const updated = report.fixes.filter((f2) => f2.status === "updated");
+    if (updated.length === 0) {
+      console.error(`CDP port ${port} is unreachable but every launch entry already carries the flag \u2014 ZCode was probably started from an entry that was not repaired, or not via a shortcut at all.`);
+      return;
+    }
+    console.error(`CDP port ${port} is unreachable; added the missing flag to ${updated.length} launch entry(ies):`);
+    for (const f2 of updated)
+      console.error(`  ${f2.path}`);
+    console.error("Quit ZCode completely and start it from one of these entries to bring the theme back.");
+  } catch (err) {
+    console.error(`launcher check failed: ${err.message}`);
   }
 }
 await server.connect(new StdioServerTransport());
